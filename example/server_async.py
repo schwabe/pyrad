@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-
 import asyncio
 import logging
 import traceback
+
+from os import path
 
 from pyrad.dictionary import Dictionary
 from pyrad.packet import AccessAccept
@@ -15,81 +16,72 @@ try:
 except:
     pass
 
-logging.basicConfig(level="DEBUG",
-                    format="%(asctime)s [%(levelname)-8s] %(message)s")
+logging.basicConfig(level='DEBUG',
+                    format='%(asctime)s [%(levelname)-8s] %(message)s')
+
+
+def print_attributes(packet):
+    print('Attributes returned by server:')
+    for key, value in packet.items():
+        print(f'{key}: {value}')
 
 
 class FakeServer(ServerAsync):
-
     def __init__(self, loop, dictionary):
 
         ServerAsync.__init__(self, loop=loop, dictionary=dictionary,
                              enable_pkt_verify=True, debug=True)
 
-    def handle_auth_packet(self, protocol, pkt, addr):
+    def handle_auth_packet(self, protocol, packet, addr):
+        print('Received an authentication request with id ', packet.id)
+        print('Authenticator ', packet.authenticator.hex())
+        print('Secret ', packet.secret)
+        print_attributes(packet)
 
-        print("Received an authentication request with id ", pkt.id)
-        print('Authenticator ', pkt.authenticator.hex())
-        print('Secret ', pkt.secret)
-        print("Attributes: ")
-        for attr in pkt.keys():
-            print("%s: %s" % (attr, pkt[attr]))
-
-        reply = self.CreateReplyPacket(pkt, **{
-            "Service-Type": "Framed-User",
-            "Framed-IP-Address": '192.168.0.1',
-            "Framed-IPv6-Prefix": "fc66::1/64"
+        reply = self.CreateReplyPacket(packet, **{
+            'Service-Type': 'Framed-User',
+            'Framed-IP-Address': '192.168.0.1',
+            'Framed-IPv6-Prefix': 'fc66::/64'
         })
 
         reply.code = AccessAccept
         protocol.send_response(reply, addr)
 
-    def handle_acct_packet(self, protocol, pkt, addr):
+    def handle_acct_packet(self, protocol, packet, addr):
+        print('Received an accounting request')
+        print_attributes(packet)
 
-        print("Received an accounting request")
-        print("Attributes: ")
-        for attr in pkt.keys():
-            print("%s: %s" % (attr, pkt[attr]))
-
-        reply = self.CreateReplyPacket(pkt)
+        reply = self.CreateReplyPacket(packet)
         protocol.send_response(reply, addr)
 
-    def handle_coa_packet(self, protocol, pkt, addr):
+    def handle_coa_packet(self, protocol, packet, addr):
+        print('Received an coa request')
+        print_attributes(packet)
 
-        print("Received an coa request")
-        print("Attributes: ")
-        for attr in pkt.keys():
-            print("%s: %s" % (attr, pkt[attr]))
-
-        reply = self.CreateReplyPacket(pkt)
+        reply = self.CreateReplyPacket(packet)
         protocol.send_response(reply, addr)
 
-    def handle_disconnect_packet(self, protocol, pkt, addr):
+    def handle_disconnect_packet(self, protocol, packet, addr):
+        print('Received an disconnect request')
+        print_attributes(packet)
 
-        print("Received an disconnect request")
-        print("Attributes: ")
-        for attr in pkt.keys():
-            print("%s: %s" % (attr, pkt[attr]))
-
-        reply = self.CreateReplyPacket(pkt)
+        reply = self.CreateReplyPacket(packet)
         # COA NAK
         reply.code = 45
         protocol.send_response(reply, addr)
 
 
-if __name__ == '__main__':
-
+def main(path_to_dictionary):
     # create server and read dictionary
     loop = asyncio.get_event_loop()
-    server = FakeServer(loop=loop, dictionary=Dictionary('dictionary'))
+    server = FakeServer(loop=loop, dictionary=Dictionary(path_to_dictionary))
 
     # add clients (address, secret, name)
-    server.hosts["127.0.0.1"] = RemoteHost("127.0.0.1",
-                                           b"Kah3choteereethiejeimaeziecumi",
-                                           "localhost")
+    server.hosts['127.0.0.1'] = RemoteHost('127.0.0.1',
+                                           b'Kah3choteereethiejeimaeziecumi',
+                                           'localhost')
 
     try:
-
         # Initialize transports
         loop.run_until_complete(
             asyncio.ensure_future(
@@ -109,9 +101,15 @@ if __name__ == '__main__':
 
     except Exception as exc:
         print('Error: ', exc)
-        print('\n'.join(traceback.format_exc().splitlines()))
+        traceback.print_exc()
+
         # Close transports
         loop.run_until_complete(asyncio.ensure_future(
             server.deinitialize_transports()))
 
     loop.close()
+
+
+if __name__ == '__main__':
+    dictionary = path.join(path.dirname(path.abspath(__file__)), 'dictionary')
+    main(dictionary)
