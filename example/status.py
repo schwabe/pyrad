@@ -7,22 +7,33 @@ import pyrad.packet
 from pyrad.client import Client
 from pyrad.dictionary import Dictionary
 
-srv = Client(server="localhost", authport=18121, secret=b"test", dict=Dictionary("dictionary"))
 
-req = srv.CreateAuthPacket(code=pyrad.packet.StatusServer)
-req["FreeRADIUS-Statistics-Type"] = "All"
-req.add_message_authenticator()
+def main():
+    srv = Client(server='localhost',
+                 authport=18121,
+                 secret=b'test',
+                 dict=Dictionary('dictionary'))
 
-try:
-    print("Sending FreeRADIUS status request")
-    reply = srv.SendPacket(req)
-except pyrad.client.Timeout:
-    print("RADIUS server does not reply")
-    sys.exit(1)
-except socket.error as error:
-    print("Network error: " + error[1])
-    sys.exit(1)
+    req = srv.CreateAuthPacket(
+        code=pyrad.packet.StatusServer,
+        FreeRADIUS_Statistics_Type= 'All',
+    )
+    req.add_message_authenticator()
 
-print("Attributes returned by server:")
-for i in reply.keys():
-    print("%s: %s" % (i, reply[i]))
+    try:
+        print('Sending FreeRADIUS status request')
+        reply = srv.SendPacket(req)
+    except pyrad.client.Timeout:
+        print('RADIUS server does not reply')
+        sys.exit(1)
+    except socket.error as error:
+        print('Network error: ' + error[1])
+        sys.exit(1)
+
+    print('Attributes returned by server:')
+    for key, value in reply.items():
+        print(f'{key}: {value}')
+
+
+if __name__ == '__main__':
+    main()
