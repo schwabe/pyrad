@@ -4,17 +4,15 @@
 from netaddr import IPAddress
 from netaddr import IPNetwork
 import struct
-import six
 import binascii
 
 
-def EncodeString(str):
-    if len(str) > 253:
+def EncodeString(string):
+    if len(string) > 253:
         raise ValueError('Can only encode strings of <= 253 characters')
-    if isinstance(str, six.text_type):
-        return str.encode('utf-8')
-    else:
-        return str
+    if isinstance(string, str):
+        return string.encode('utf-8')
+    return string
 
 
 def EncodeOctets(str):
@@ -29,20 +27,20 @@ def EncodeOctets(str):
 
 
 def EncodeAddress(addr):
-    if not isinstance(addr, six.string_types):
+    if not isinstance(addr, str):
         raise TypeError('Address has to be a string')
     return IPAddress(addr).packed
 
 
 def EncodeIPv6Prefix(addr):
-    if not isinstance(addr, six.string_types):
+    if not isinstance(addr, str):
         raise TypeError('IPv6 Prefix has to be a string')
     ip = IPNetwork(addr)
     return struct.pack('2B', *[0, ip.prefixlen]) + ip.ip.packed
 
 
 def EncodeIPv6Address(addr):
-    if not isinstance(addr, six.string_types):
+    if not isinstance(addr, str):
         raise TypeError('IPv6 Address has to be a string')
     return IPAddress(addr).packed
 
