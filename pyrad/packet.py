@@ -124,7 +124,7 @@ class Packet(OrderedDict):
         return self.message_authenticator
 
     def _refresh_message_authenticator(self):
-        hmac_constructor = hmac.new(self.secret)
+        hmac_constructor = hmac.new(self.secret, digestmod=hashlib.md5)
 
         # Maintain a zero octets content for md5 and hmac calculation.
         self['Message-Authenticator'] = 16 * b'\00'
@@ -178,7 +178,7 @@ class Packet(OrderedDict):
         header = struct.pack('!BBH', self.code, self.id,
                              (20 + len(attr)))
 
-        hmac_constructor = hmac.new(key)
+        hmac_constructor = hmac.new(key, digestmod=hashlib.md5)
         hmac_constructor.update(header)
         if self.code in (AccountingRequest, DisconnectRequest,
                          CoARequest, AccountingResponse):
@@ -640,6 +640,7 @@ class AuthPacket(Packet):
                 header
                 + attr
                 + struct.pack('!BB16s', 80, struct.calcsize('!BB16s'), b''),
+                digestmod=hashlib.md5
             ).digest()
             return (
                 header
