@@ -561,21 +561,18 @@ class Packet(OrderedDict):
             self.authenticator = 16 * b'\x00'
 
         random_value = 32768 + random_generator.randrange(0, 32767)
-        salt_raw = struct.pack('!H', random_value )
-        salt = chr(salt_raw[0]) + chr(salt_raw[0])
-
-        result = bytes(salt)
+        result = struct.pack('!H', random_value )
 
         length = struct.pack("B", len(value))
         buf = length + value
         if len(buf) % 16 != 0:
             buf += b'\x00' * (16 - (len(buf) % 16))
 
-        last = self.authenticator + six.b(salt)
+        last = self.authenticator + result
         while buf:
             hash = md5_constructor(self.secret + last).digest()
             for i in range(16):
-                result += bytes((hash[i] ^ buf[i],))
+                result += bytes([hash[i] ^ buf[i]])
             last = result[-16:]
             buf = buf[16:]
 
