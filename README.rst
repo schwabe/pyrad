@@ -44,15 +44,15 @@ Here is an example of doing a authentication request::
         print("access denied")
 
     print("Attributes returned by server:")
-    for i in reply.keys():
-        print("%s: %s" % (i, reply[i]))
+    for key, values in reply.items():
+        print("{key}: {value}")
 
 
 
 Requirements & Installation
 ===========================
 
-pyrad requires Python 2.7, or Python 3.4 or later
+pyrad requires Python 3.6 or later
 
 Installing is simple; pyrad uses the standard distutils system for installing
 Python modules::
@@ -64,7 +64,7 @@ Author, Copyright, Availability
 ===============================
 
 pyrad was written by Wichert Akkerman <wichert@wiggy.net> and is maintained by 
-Christian Giese (GIC-de) and Istvan Ruzman (Istvan91). 
+Christian Giese (GIC-de) and Istvan Ruzman (Istvan91).
 
 This project is licensed under a BSD license.
 
