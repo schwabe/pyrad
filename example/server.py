@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 from pyrad import dictionary, packet, server
 import logging
 

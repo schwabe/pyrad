@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 from pyrad.client import Client
 from pyrad.dictionary import Dictionary
 import random
