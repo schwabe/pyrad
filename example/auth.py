@@ -2,16 +2,18 @@
 import socket
 import sys
 
+from os import path
+
 import pyrad.packet
 
 from pyrad.client import Client
 from pyrad.dictionary import Dictionary
 
 
-def main():
+def main(path_to_dictionary):
     srv = Client(server='127.0.0.1',
                  secret=b'Kah3choteereethiejeimaeziecumi',
-                 dict=Dictionary('dictionary'))
+                 dict=Dictionary(path_to_dictionary))
 
     req = srv.CreateAuthPacket(
         code=pyrad.packet.AccessRequest,
@@ -47,4 +49,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    dictionary = path.join(path.dirname(path.abspath(__file__)), 'dictionary')
+    main(dictionary)

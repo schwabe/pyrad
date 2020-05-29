@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 import sys
 
+from os import path
+
 import pyrad.packet
 
 from pyrad.client import Client
 from pyrad.dictionary import Dictionary
 
 
-def main(coa_type, nas_identifier):
+def main(path_to_dictionary, coa_type, nas_identifier):
     # create coa client
     client = Client(server='127.0.0.1',
                     secret=b'Kah3choteereethiejeimaeziecumi',
-                    dict=Dictionary('dictionary'))
+                    dict=Dictionary(path_to_dictionary))
 
     # set coa timeout
     client.timeout = 30
@@ -44,4 +46,6 @@ if __name__ == '__main__':
         print('usage: coa.py {coa|dis} daemon-1234')
         sys.exit(1)
 
-    main(sys.argv[1], sys.argv[2])
+    dictionary = path.join(path.dirname(path.abspath(__file__)), 'dictionary')
+
+    main(dictionary, sys.argv[1], sys.argv[2])

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import logging
 
+from os import path
+
 import pyrad.packet
 
 from pyrad import server
@@ -54,9 +56,10 @@ class FakeServer(server.Server):
         self.SendReplyPacket(packet.fd, reply)
 
 
-def main():
+def main(path_to_dictionary):
     # create server and read dictionary
-    srv = FakeServer(dict=Dictionary('dictionary'), coa_enabled=True)
+    srv = FakeServer(dict=Dictionary(path_to_dictionary),
+                     coa_enabled=True)
 
     # add clients (address, secret, name)
     srv.hosts['127.0.0.1'] = server.RemoteHost(
@@ -70,4 +73,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    dictionary = path.join(path.dirname(path.abspath(__file__)), 'dictionary')
+    main(dictionary)
