@@ -5,66 +5,74 @@
 
 import sys
 
-from pyrad import dictionary, packet, server
+from os import path
+
+import pyrad.packet
+
+from pyrad.dictionary import Dictionary
+from pyrad.server import Server, RemoteHost
 
 
-class FakeCoA(server.Server):
+def print_attributes(packet):
+    print('Attributes')
+    for key, value in packet.items():
+        print(f'{key}: {value}')
 
-    def HandleCoaPacket(self, pkt):
-        """Accounting packet handler.
+
+class FakeCoA(Server):
+    def HandleCoaPacket(self, packet):
+        '''Accounting packet handler.
         Function that is called when a valid
         accounting packet has been received.
 
-        :param pkt: packet to process
-        :type  pkt: Packet class instance
-        """
-        print("Received a coa request %d" % pkt.code)
-        print("  Attributes: ")
-        for attr in pkt.keys():
-            print("  %s: %s" % (attr, pkt[attr]))
+        :param packet: packet to process
+        :type  packet: Packet class instance
+        '''
+        print('Received a coa request %d' % packet.code)
+        print_attributes(packet)
 
-        reply = self.CreateReplyPacket(pkt)
+        reply = self.CreateReplyPacket(packet)
         # try ACK or NACK
         # reply.code = packet.CoANAK
         reply.code = packet.CoAACK
-        self.SendReplyPacket(pkt.fd, reply)
+        self.SendReplyPacket(packet.fd, reply)
 
-    def HandleDisconnectPacket(self, pkt):
-        print("Received a disconnect request %d" % pkt.code)
-        print("  Attributes: ")
-        for attr in pkt.keys():
-            print("  %s: %s" % (attr, pkt[attr]))
+    def HandleDisconnectPacket(self, packet):
+        print('Received a disconnect request %d' % packet.code)
+        print_attributes(packet)
 
-        reply = self.CreateReplyPacket(pkt)
+        reply = self.CreateReplyPacket(packet)
         # try ACK or NACK
         # reply.code = packet.DisconnectNAK
-        reply.code = packet.DisconnectACK
-        self.SendReplyPacket(pkt.fd, reply)
+        reply.code = pyrad.packet.DisconnectACK
+        self.SendReplyPacket(packet.fd, reply)
 
 
-if __name__ == '__main__':
-
-    if len(sys.argv) != 2:
-        print("usage: client-coa.py 3799")
-        sys.exit(1)
-
-    bindport = int(sys.argv[1])
-
+def main(path_to_dictionary, coa_port):
     # create server/coa only and read dictionary
     # bind and listen only on 127.0.0.1:argv[1]
     coa = FakeCoA(
-        addresses=["127.0.0.1"],
-        dict=dictionary.Dictionary("dictionary"),
-        coaport=bindport,
+        addresses=['127.0.0.1'],
+        dict=Dictionary(path_to_dictionary),
+        coaport=coa_port,
         auth_enabled=False,
         acct_enabled=False,
         coa_enabled=True)
 
     # add peers (address, secret, name)
-    coa.hosts["127.0.0.1"] = server.RemoteHost(
-        "127.0.0.1",
-        b"Kah3choteereethiejeimaeziecumi",
-        "localhost")
+    coa.hosts['127.0.0.1'] = RemoteHost(
+        '127.0.0.1',
+        b'Kah3choteereethiejeimaeziecumi',
+        'localhost')
 
     # start
     coa.Run()
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print('usage: client-coa.py {portnumber}')
+        sys.exit(1)
+
+    dictionary = path.join(path.dirname(path.abspath(__file__)), 'dictionary')
+    main(dictionary, int(sys.argv[1]))
