@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 import asyncio
-
 import logging
 import traceback
-from pyrad.dictionary import Dictionary
+
 from pyrad.client_async import ClientAsync
+from pyrad.dictionary import Dictionary
 from pyrad.packet import AccessAccept
 
 logging.basicConfig(level="DEBUG",

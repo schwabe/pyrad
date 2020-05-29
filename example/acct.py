@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-from pyrad.client import Client
-from pyrad.dictionary import Dictionary
 import random
 import socket
 import sys
+
 import pyrad.packet
+
+from pyrad.client import Client
+from pyrad.dictionary import Dictionary
 
 
 def SendPacket(srv, req):

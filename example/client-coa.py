@@ -3,9 +3,9 @@
 # Copyright 6WIND, 2017
 #
 
-from pyrad import dictionary, packet, server
 import sys
-import prctl
+
+from pyrad import dictionary, packet, server
 
 
 class FakeCoA(server.Server):
@@ -44,8 +44,6 @@ class FakeCoA(server.Server):
 
 if __name__ == '__main__':
 
-    prctl.set_name('radius-FakeCoA-client')
-
     if len(sys.argv) != 2:
         print("usage: client-coa.py 3799")
         sys.exit(1)
@@ -64,9 +62,9 @@ if __name__ == '__main__':
 
     # add peers (address, secret, name)
     coa.hosts["127.0.0.1"] = server.RemoteHost(
-            "127.0.0.1",
-            b"Kah3choteereethiejeimaeziecumi",
-            "localhost")
+        "127.0.0.1",
+        b"Kah3choteereethiejeimaeziecumi",
+        "localhost")
 
     # start
     coa.Run()

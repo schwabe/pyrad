@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-from pyrad.client import Client
-from pyrad import dictionary
-from pyrad import packet
 import sys
 
+from pyrad.client import Client
+from pyrad import dictionary, packet
 
 if len(sys.argv) != 3:
     print("usage: coa.py {coa|dis} daemon-1234")

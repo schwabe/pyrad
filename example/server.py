@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-from pyrad import dictionary, packet, server
 import logging
+
+from pyrad import dictionary, packet, server
 
 logging.basicConfig(filename="pyrad.log", level="DEBUG",
                     format="%(asctime)s [%(levelname)-8s] %(message)s")

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-from pyrad.client import Client
-from pyrad.dictionary import Dictionary
 import socket
 import sys
+
 import pyrad.packet
+
+from pyrad.client import Client
+from pyrad.dictionary import Dictionary
 
 srv = Client(server="localhost", authport=18121, secret=b"test", dict=Dictionary("dictionary"))
 

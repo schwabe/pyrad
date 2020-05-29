@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 import asyncio
-
 import logging
 import traceback
+
 from pyrad.dictionary import Dictionary
-from pyrad.server_async import ServerAsync
 from pyrad.packet import AccessAccept
+from pyrad.server_async import ServerAsync
 from pyrad.server import RemoteHost
 
 try:
