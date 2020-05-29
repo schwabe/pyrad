@@ -8,6 +8,7 @@ from pyrad import dictionary, packet, server
 import sys
 import prctl
 
+
 class FakeCoA(server.Server):
 
     def HandleCoaPacket(self, pkt):
@@ -41,22 +42,32 @@ class FakeCoA(server.Server):
         reply.code = packet.DisconnectACK
         self.SendReplyPacket(pkt.fd, reply)
 
+
 if __name__ == '__main__':
 
     prctl.set_name('radius-FakeCoA-client')
 
     if len(sys.argv) != 2:
-        print ("usage: client-coa.py 3799")
+        print("usage: client-coa.py 3799")
         sys.exit(1)
 
-    bindport=int(sys.argv[1])
+    bindport = int(sys.argv[1])
 
     # create server/coa only and read dictionary
     # bind and listen only on 127.0.0.1:argv[1]
-    coa = FakeCoA(addresses=["127.0.0.1"], dict=dictionary.Dictionary("dictionary"), coaport=bindport, auth_enabled=False, acct_enabled=False, coa_enabled=True)
+    coa = FakeCoA(
+        addresses=["127.0.0.1"],
+        dict=dictionary.Dictionary("dictionary"),
+        coaport=bindport,
+        auth_enabled=False,
+        acct_enabled=False,
+        coa_enabled=True)
 
     # add peers (address, secret, name)
-    coa.hosts["127.0.0.1"] = server.RemoteHost("127.0.0.1", b"Kah3choteereethiejeimaeziecumi", "localhost")
+    coa.hosts["127.0.0.1"] = server.RemoteHost(
+            "127.0.0.1",
+            b"Kah3choteereethiejeimaeziecumi",
+            "localhost")
 
     # start
     coa.Run()

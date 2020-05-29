@@ -14,15 +14,15 @@ def EncodeString(string):
     return string
 
 
-def EncodeOctets(str):
-    if len(str) > 253:
+def EncodeOctets(string):
+    if len(string) > 253:
         raise ValueError('Can only encode strings of <= 253 characters')
 
-    if str.startswith(b'0x'):
-        hexstring = str.split(b'0x')[1]
+    if string.startswith(b'0x'):
+        hexstring = string.split(b'0x')[1]
         return binascii.unhexlify(hexstring)
     else:
-        return str
+        return string
 
 
 def EncodeAddress(addr):
@@ -34,17 +34,17 @@ def EncodeAddress(addr):
 def EncodeIPv6Prefix(addr):
     if not isinstance(addr, str):
         raise TypeError('IPv6 Prefix has to be a string')
-    ip = ipaddress_ip_network(addr)
+    ip = ipaddress.ip_network(addr)
     return struct.pack('2B', *[0, ip.prefixlen]) + ip.ip.packed
 
 
 def EncodeIPv6Address(addr):
     if not isinstance(addr, str):
         raise TypeError('IPv6 Address has to be a string')
-    return ip_address.IPv6Address(addr).packed
+    return ipaddress.IPv6Address(addr).packed
 
 
-def EncodeAscendBinary(str):
+def EncodeAscendBinary(string):
     """
     Format: List of type=value pairs sperated by spaces.
 
@@ -85,7 +85,7 @@ def EncodeAscendBinary(str):
         'dportq':       b'\x00'
     }
 
-    for t in str.split(' '):
+    for t in string.split(' '):
         key, value = t.split('=')
         if key == 'family' and value == 'ipv6':
             terms[key] = b'\x03'
@@ -108,7 +108,8 @@ def EncodeAscendBinary(str):
 
     trailer = 8 * b'\x00'
 
-    result = b''.join((terms['family'], terms['action'], terms['direction'], b'\x00', 
+    result = b''.join((
+        terms['family'], terms['action'], terms['direction'], b'\x00',
         terms['src'], terms['dst'], terms['srcl'], terms['dstl'], terms['proto'], b'\x00',
         terms['sport'], terms['dport'], terms['sportq'], terms['dportq'], b'\x00\x00', trailer))
     return result
@@ -117,16 +118,18 @@ def EncodeAscendBinary(str):
 def EncodeInteger(num, format='!I'):
     try:
         num = int(num)
-    except:
+    except ValueError:
         raise TypeError('Can not encode non-integer as integer')
     return struct.pack(format, num)
+
 
 def EncodeInteger64(num, format='!Q'):
     try:
         num = int(num)
-    except:
+    except ValueError:
         raise TypeError('Can not encode non-integer as integer64')
     return struct.pack(format, num)
+
 
 def EncodeDate(num):
     if not isinstance(num, int):
@@ -134,15 +137,15 @@ def EncodeDate(num):
     return struct.pack('!I', num)
 
 
-def DecodeString(str):
+def DecodeString(string):
     try:
-        return str.decode('utf-8')
+        return string.decode('utf-8')
     except:
-        return str
+        return string
 
 
-def DecodeOctets(str):
-    return str
+def DecodeOctets(string):
+    return string
 
 
 def DecodeAddress(addr):
@@ -161,15 +164,17 @@ def DecodeIPv6Address(addr):
     return str(ipaddress.IPv6Address(prefix))
 
 
-def DecodeAscendBinary(str):
-    return str
+def DecodeAscendBinary(string):
+    return string
 
 
 def DecodeInteger(num, format='!I'):
     return (struct.unpack(format, num))[0]
 
+
 def DecodeInteger64(num, format='!Q'):
     return (struct.unpack(format, num))[0]
+
 
 def DecodeDate(num):
     return (struct.unpack('!I', num))[0]

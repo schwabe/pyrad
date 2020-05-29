@@ -18,6 +18,7 @@ def SendPacket(srv, req):
         print("Network error: " + error[1])
         sys.exit(1)
 
+
 srv = Client(server="localhost", secret=b"Kah3choteereethiejeimaeziecumi", dict=Dictionary("dictionary"))
 
 req = srv.CreateAcctPacket(User_Name="wichert")

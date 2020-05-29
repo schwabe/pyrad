@@ -18,13 +18,13 @@ except:
 logging.basicConfig(level="DEBUG",
                     format="%(asctime)s [%(levelname)-8s] %(message)s")
 
+
 class FakeServer(ServerAsync):
 
     def __init__(self, loop, dictionary):
 
         ServerAsync.__init__(self, loop=loop, dictionary=dictionary,
                              enable_pkt_verify=True, debug=True)
-
 
     def handle_auth_packet(self, protocol, pkt, addr):
 
@@ -100,7 +100,7 @@ if __name__ == '__main__':
         try:
             # start server
             loop.run_forever()
-        except KeyboardInterrupt as k:
+        except KeyboardInterrupt:
             pass
 
         # Close transports

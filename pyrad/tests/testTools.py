@@ -1,8 +1,6 @@
 from ipaddress import AddressValueError
 from pyrad import tools
 import unittest
-import sys
-
 
 
 class EncodingTests(unittest.TestCase):

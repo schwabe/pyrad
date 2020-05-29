@@ -4,16 +4,17 @@
 
 import asyncio
 import logging
-import traceback
 
 from abc import abstractmethod, ABCMeta
 from enum import Enum
 from datetime import datetime
-from pyrad.packet import Packet, AccessAccept, AccessReject, \
-    AccountingRequest, AccountingResponse, \
-    DisconnectACK, DisconnectNAK, DisconnectRequest, CoARequest, \
-    CoAACK, CoANAK, AccessRequest, AuthPacket, AcctPacket, CoAPacket, \
+from pyrad.packet import (
+    Packet, AccessAccept, AccessReject,
+    AccountingRequest, AccountingResponse,
+    DisconnectACK, DisconnectNAK, DisconnectRequest, CoARequest,
+    CoAACK, CoANAK, AccessRequest, AuthPacket, AcctPacket, CoAPacket,
     PacketError
+)
 
 from pyrad.server import ServerPacketError
 

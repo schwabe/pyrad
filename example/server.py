@@ -56,6 +56,7 @@ class FakeServer(server.Server):
         reply.code = 45
         self.SendReplyPacket(pkt.fd, reply)
 
+
 if __name__ == '__main__':
 
     # create server and read dictionary

@@ -93,9 +93,9 @@ class DatagramProtocolClient(asyncio.Protocol):
         socket = transport.get_extra_info('socket')
         self.logger.info(
             '[%s:%d] Transport created with binding in %s:%d',
-                self.server, self.port,
-                socket.getsockname()[0],
-                socket.getsockname()[1]
+            self.server, self.port,
+            socket.getsockname()[0],
+            socket.getsockname()[1],
         )
 
         pre_loop = asyncio.get_event_loop()

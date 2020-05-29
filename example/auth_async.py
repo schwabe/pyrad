@@ -31,6 +31,7 @@ def create_request(client, user):
 
     return req
 
+
 def print_reply(reply):
     if reply.code == AccessAccept:
         print("Access accepted")
@@ -40,6 +41,7 @@ def print_reply(reply):
     print("Attributes returned by server:")
     for i in reply.keys():
         print("%s: %s" % (i, reply[i]))
+
 
 def test_auth1():
 
@@ -54,8 +56,6 @@ def test_auth1():
                                              local_auth_port=8000,
                                              enable_acct=True,
                                              enable_coa=True)))
-
-
 
         req = client.CreateAuthPacket(User_Name="wichert")
 
@@ -107,6 +107,7 @@ def test_auth1():
 
     loop.close()
 
+
 def test_multi_auth():
 
     global client
@@ -120,8 +121,6 @@ def test_multi_auth():
                                              local_auth_port=8000,
                                              enable_acct=True,
                                              enable_coa=True)))
-
-
 
         reqs = []
         for i in range(255):
@@ -160,5 +159,6 @@ def test_multi_auth():
 
     loop.close()
 
-#test_multi_auth()
+
+# test_multi_auth()
 test_auth1()

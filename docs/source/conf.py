@@ -31,9 +31,9 @@ sys.path.insert(0, os.path.abspath('../../'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.viewcode']
+              'sphinx.ext.intersphinx',
+              'sphinx.ext.todo',
+              'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -154,8 +154,6 @@ texinfo_documents = [
      author, 'pyrad', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
