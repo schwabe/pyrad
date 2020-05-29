@@ -18,15 +18,15 @@ def main(path_to_dictionary):
     req = srv.CreateAuthPacket(
         code=pyrad.packet.AccessRequest,
         **{
-        'User-Name': 'wichert',
-        'NAS-IP-Address': '192.168.1.10',
-        'NAS-Port': 0,
-        'Service-Type': 'Login-User',
-        'NAS-Identifier': 'trillian',
-        'Called-Station-Id': '00-04-5F-00-0F-D1',
-        'Calling-Station-Id': '00-01-24-80-B3-9C',
-        'Framed-IP-Address': '10.0.0.100',
-    })
+            'User-Name': 'wichert',
+            'NAS-IP-Address': '192.168.1.10',
+            'NAS-Port': 0,
+            'Service-Type': 'Login-User',
+            'NAS-Identifier': 'trillian',
+            'Called-Station-Id': '00-04-5F-00-0F-D1',
+            'Calling-Station-Id': '00-01-24-80-B3-9C',
+            'Framed-IP-Address': '10.0.0.100',
+        })
 
     try:
         print('Sending authentication request')
