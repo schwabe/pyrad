@@ -1,4 +1,4 @@
-from netaddr import AddrFormatError
+from ipaddress import AddressValueError
 from pyrad import tools
 import unittest
 import sys
@@ -16,7 +16,7 @@ class EncodingTests(unittest.TestCase):
         self.assertRaises(TypeError, tools.EncodeString, 1)
 
     def testAddressEncoding(self):
-        self.assertRaises(AddrFormatError, tools.EncodeAddress, 'TEST123')
+        self.assertRaises(AddressValueError, tools.EncodeAddress, 'TEST123')
         self.assertEqual(
                 tools.EncodeAddress('192.168.0.255'),
                 b'\xc0\xa8\x00\xff')

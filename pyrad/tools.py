@@ -1,10 +1,9 @@
 # tools.py
 #
 # Utility functions
-from netaddr import IPAddress
-from netaddr import IPNetwork
-import struct
 import binascii
+import ipaddress
+import struct
 
 
 def EncodeString(string):
@@ -29,20 +28,20 @@ def EncodeOctets(str):
 def EncodeAddress(addr):
     if not isinstance(addr, str):
         raise TypeError('Address has to be a string')
-    return IPAddress(addr).packed
+    return ipaddress.IPv4Address(addr).packed
 
 
 def EncodeIPv6Prefix(addr):
     if not isinstance(addr, str):
         raise TypeError('IPv6 Prefix has to be a string')
-    ip = IPNetwork(addr)
+    ip = ipaddress_ip_network(addr)
     return struct.pack('2B', *[0, ip.prefixlen]) + ip.ip.packed
 
 
 def EncodeIPv6Address(addr):
     if not isinstance(addr, str):
         raise TypeError('IPv6 Address has to be a string')
-    return IPAddress(addr).packed
+    return ip_address.IPv6Address(addr).packed
 
 
 def EncodeAscendBinary(str):
@@ -99,8 +98,8 @@ def EncodeAscendBinary(str):
         elif key == 'direction' and value == 'out':
             terms[key] = b'\x00'
         elif key == 'src' or key == 'dst':
-            ip = IPNetwork(value)
-            terms[key] = ip.ip.packed
+            ip = ipaddress.ip_network(value)
+            terms[key] = ip.network_address.packed
             terms[key+'l'] = struct.pack('B', ip.prefixlen)
         elif key == 'sport' or key == 'dport':
             terms[key] = struct.pack('!H', int(value))
@@ -153,13 +152,13 @@ def DecodeAddress(addr):
 def DecodeIPv6Prefix(addr):
     addr = addr + b'\x00' * (18-len(addr))
     _, length, prefix = ':'.join(map('{0:x}'.format, struct.unpack('!BB'+'H'*8, addr))).split(":", 2)
-    return str(IPNetwork("%s/%s" % (prefix, int(length, 16))))
+    return str(ipaddress.ip_network("%s/%s" % (prefix, int(length, 16))))
 
 
 def DecodeIPv6Address(addr):
     addr = addr + b'\x00' * (16-len(addr))
     prefix = ':'.join(map('{0:x}'.format, struct.unpack('!'+'H'*8, addr)))
-    return str(IPAddress(prefix))
+    return str(ipaddress.IPv6Address(prefix))
 
 
 def DecodeAscendBinary(str):

@@ -27,7 +27,6 @@ setup(name='pyrad',
       keywords=['radius', 'authentication'],
       zip_safe=True,
       include_package_data=True,
-      install_requires=['netaddr'],
       tests_require='nose>=0.10.0b1',
       test_suite='nose.collector',
       )
