@@ -149,19 +149,18 @@ def DecodeOctets(string):
 
 
 def DecodeAddress(addr):
-    return '.'.join(map(str, struct.unpack('BBBB', addr)))
+    return '.'.join((str(a) for a in struct.unpack('BBBB', addr)))
 
 
 def DecodeIPv6Prefix(addr):
     addr = addr + b'\x00' * (18-len(addr))
-    _, length, prefix = ':'.join(map('{0:x}'.format, struct.unpack('!BB'+'H'*8, addr))).split(":", 2)
-    prefixlen = int(length, 16)
-    return str(ipaddress.ip_network(f"{prefix}/{prefixlen}"))
+    prefix = addr[:2]
+    addr = addr[2:]
+    return str(ipaddress.ip_network((prefix, addr)))
 
 
 def DecodeIPv6Address(addr):
     addr = addr + b'\x00' * (16-len(addr))
-    prefix = ':'.join(map('{0:x}'.format, struct.unpack('!'+'H'*8, addr)))
     return str(ipaddress.IPv6Address(prefix))
 
 
