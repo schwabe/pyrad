@@ -161,7 +161,7 @@ def DecodeIPv6Prefix(addr):
 
 def DecodeIPv6Address(addr):
     addr = addr + b'\x00' * (16-len(addr))
-    return str(ipaddress.IPv6Address(prefix))
+    return str(ipaddress.IPv6Address(addr))
 
 
 def DecodeAscendBinary(string):
@@ -217,6 +217,7 @@ DECODE_MAP = {
     'date': DecodeDate,
     'integer64': DecodeInteger64,
 }
+
 
 def DecodeAttr(datatype, value):
     try:
