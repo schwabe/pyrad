@@ -333,9 +333,7 @@ class Packet(OrderedDict):
     def __setitem__(self, key, item):
         if isinstance(key, str):
             (key, item) = self._EncodeKeyValues(key, item)
-            OrderedDict.__setitem__(self, key, item)
-        else:
-            OrderedDict.__setitem__(self, key, item)
+        OrderedDict.__setitem__(self, key, item)
 
     def keys(self):
         return [self._DecodeKey(key) for key in OrderedDict.keys(self)]
