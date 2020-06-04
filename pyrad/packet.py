@@ -214,16 +214,15 @@ class Packet(OrderedDict):
                       **attributes)
 
     def _DecodeValue(self, attr, value):
-        if attr.values.has_backward(value):
+        try:
             return attr.values.get_backward(value)
-        else:
+        except KeyError:
             return tools.DecodeAttr(attr.type, value)
 
     def _EncodeValue(self, attr, value):
-        result = ''
-        if attr.values.has_forward(value):
+        try:
             result = attr.values.get_forward(value)
-        else:
+        except KeyError:
             result = tools.EncodeAttr(attr.type, value)
 
         if attr.encrypt == 2:
@@ -266,8 +265,10 @@ class Packet(OrderedDict):
     def _DecodeKey(self, key):
         """Turn a key into a string if possible"""
 
-        if self.dict.attrindex.has_backward(key):
+        try:
             return self.dict.attrindex.get_backward(key)
+        except KeyError:
+            pass
         return key
 
     def AddAttribute(self, key, value):
