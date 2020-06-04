@@ -572,9 +572,9 @@ class Packet(OrderedDict):
 
         last = self.authenticator + result
         while buf:
-            hash = md5_constructor(self.secret + last).digest()
-            for i in range(16):
-                result += bytes([hash[i] ^ buf[i]])
+            cur_hash = md5_constructor(self.secret + last).digest()
+            for b, h in zip(buf, cur_hash):
+                result += bytes([b ^ h])
             last = result[-16:]
             buf = buf[16:]
 
@@ -664,19 +664,7 @@ class AuthPacket(Packet):
         :return:         plaintext password
         :rtype:          unicode string
         """
-        buf = password
-        pw = b''
-
-        last = self.authenticator
-        while buf:
-            hash = md5_constructor(self.secret + last).digest()
-            for i in range(16):
-                pw += bytes((hash[i] ^ buf[i],))
-
-            (last, buf) = (buf[:16], buf[16:])
-
-        while pw.endswith(b'\x00'):
-            pw = pw[:-1]
+        pw = self.radius_password_pseudo_hash(password).rstrip(b'\x00')
 
         return pw.decode('utf-8')
 
@@ -704,16 +692,19 @@ class AuthPacket(Packet):
         if len(password) % 16 != 0:
             buf += b'\x00' * (16 - (len(password) % 16))
 
+        return self.radius_password_pseudo_hash(buf)
+
+    def radius_password_pseudo_hash(self, password):
         result = b''
-
+        buf = password
         last = self.authenticator
-        while buf:
-            hash = md5_constructor(self.secret + last).digest()
-            for i in range(16):
-                result += bytes((hash[i] ^ buf[i],))
 
-            last = result[-16:]
-            buf = buf[16:]
+        while buf:
+            cur_hash = md5_constructor(self.secret + last).digest()
+            for b, h in zip(buf, cur_hash):
+                result += bytes([b ^ h])
+
+            (last, buf) = (buf[:16], buf[16:])
 
         return result
 
