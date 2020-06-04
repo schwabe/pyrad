@@ -99,7 +99,7 @@ class ParseError(Exception):
         self.line = data.get('line', -1)
 
     def __str__(self):
-        line == f'({self.line})' if self.line > -1 else ''
+        line = f'({self.line})' if self.line > -1 else ''
         return f'{self.file}: ParseError: {self.msg}'
 
 
@@ -166,7 +166,7 @@ class Dictionary(object):
 
     has_key = __contains__
 
-    def __ParseAttribute(self, state, tokens):
+    def __parse_attribute(self, state, tokens):
         if not len(tokens) in [4, 5]:
             raise ParseError(
                 'Incorrect number of tokens for attribute definition',
@@ -258,7 +258,7 @@ class Dictionary(object):
             state['tlvs'][parent_code].sub_attributes[code] = attribute
             self.attributes[attribute].parent = state['tlvs'][parent_code]
 
-    def __ParseValue(self, state, tokens, defer):
+    def __parse_value(self, state, tokens, defer):
         if len(tokens) != 4:
             raise ParseError('Incorrect number of tokens for value definition',
                              file=state['file'],
@@ -281,7 +281,7 @@ class Dictionary(object):
         value = tools.EncodeAttr(adef.type, value)
         self.attributes[attr].values.add(key, value)
 
-    def __ParseVendor(self, state, tokens):
+    def __parse_vendor(self, state, tokens):
         if len(tokens) not in [3, 4]:
             raise ParseError(
                     'Incorrect number of tokens for vendor definition',
@@ -313,7 +313,7 @@ class Dictionary(object):
         (vendorname, vendor) = tokens[1:3]
         self.vendors.add(vendorname, int(vendor, 0))
 
-    def __ParseBeginVendor(self, state, tokens):
+    def __parse_begin_vendor(self, state, tokens):
         if len(tokens) != 2:
             raise ParseError(
                     'Incorrect number of tokens for begin-vendor statement',
@@ -330,7 +330,7 @@ class Dictionary(object):
 
         state['vendor'] = vendor
 
-    def __ParseEndVendor(self, state, tokens):
+    def __parse_end_vendor(self, state, tokens):
         if len(tokens) != 2:
             raise ParseError(
                 'Incorrect number of tokens for end-vendor statement',
@@ -372,18 +372,18 @@ class Dictionary(object):
 
             key = tokens[0].upper()
             if key == 'ATTRIBUTE':
-                self.__ParseAttribute(state, tokens)
+                self.__parse_attribute(state, tokens)
             elif key == 'VALUE':
-                self.__ParseValue(state, tokens, True)
+                self.__parse_value(state, tokens, True)
             elif key == 'VENDOR':
-                self.__ParseVendor(state, tokens)
+                self.__parse_vendor(state, tokens)
             elif key == 'BEGIN-VENDOR':
-                self.__ParseBeginVendor(state, tokens)
+                self.__parse_begin_vendor(state, tokens)
             elif key == 'END-VENDOR':
-                self.__ParseEndVendor(state, tokens)
+                self.__parse_end_vendor(state, tokens)
 
         for state, tokens in self.defer_parse:
             key = tokens[0].upper()
             if key == 'VALUE':
-                self.__ParseValue(state, tokens, False)
+                self.__parse_value(state, tokens, False)
         self.defer_parse = []
