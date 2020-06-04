@@ -50,11 +50,11 @@ class DictFile(object):
         @type fil: string or file
         """
         self.stack = []
-        self.__ReadNode(fil)
+        self.__read_node(fil)
 
-    def __ReadNode(self, fil):
+    def __read_node(self, fil):
         node = None
-        parentdir = self.__CurDir()
+        parentdir = self.__cur_dir()
         if isinstance(fil, str):
             fname = None
             if os.path.isabs(fil):
@@ -68,13 +68,13 @@ class DictFile(object):
             node = _Node(fil, '', parentdir)
         self.stack.append(node)
 
-    def __CurDir(self):
+    def __cur_dir(self):
         if self.stack:
             return self.stack[-1].dir
         else:
             return os.path.realpath(os.curdir)
 
-    def __GetInclude(self, line):
+    def __get_include(self, line):
         line = line.split("#", 1)[0].strip()
         tokens = line.split()
         if tokens and tokens[0].upper() == '$INCLUDE':
@@ -107,9 +107,9 @@ class DictFile(object):
             if line is None:
                 self.stack.pop()
             else:
-                inc = self.__GetInclude(line)
+                inc = self.__get_include(line)
                 if inc:
-                    self.__ReadNode(inc)
+                    self.__read_node(inc)
                 else:
                     return line
         raise StopIteration
