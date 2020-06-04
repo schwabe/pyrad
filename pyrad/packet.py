@@ -515,7 +515,7 @@ class Packet(OrderedDict):
         if len(packet) != length:
             raise PacketError('Packet has invalid length')
         if length > 8192:
-            raise PacketError('Packet length is too long (%d)' % length)
+            raise PacketError(f'Packet length is too long ({length})')
 
         self.clear()
 
@@ -527,8 +527,7 @@ class Packet(OrderedDict):
                 raise PacketError('Attribute header is corrupt')
 
             if attrlen < 2:
-                raise PacketError(
-                        'Attribute length is too small (%d)' % attrlen)
+                raise PacketError(f'Attribute length is too small (attrlen)')
 
             value = packet[2:attrlen]
             attribute = self.dict.attributes.get(self._DecodeKey(key))

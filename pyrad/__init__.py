@@ -24,8 +24,8 @@ Here is an example of doing a authentication request::
       print "access denied"
 
   print "Attributes returned by server:"
-  for i in reply.keys():
-      print "%s: %s" % (i, reply[i])
+  for key, value in reply.items():
+      print f'{key}: {value}')
 
 
 This package contains four modules:

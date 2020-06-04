@@ -155,7 +155,8 @@ def DecodeAddress(addr):
 def DecodeIPv6Prefix(addr):
     addr = addr + b'\x00' * (18-len(addr))
     _, length, prefix = ':'.join(map('{0:x}'.format, struct.unpack('!BB'+'H'*8, addr))).split(":", 2)
-    return str(ipaddress.ip_network("%s/%s" % (prefix, int(length, 16))))
+    prefixlen = int(length, 16)
+    return str(ipaddress.ip_network(f"{prefix}/{prefixlen}"))
 
 
 def DecodeIPv6Address(addr):
@@ -206,7 +207,7 @@ def EncodeAttr(datatype, value):
     elif datatype == 'integer64':
         return EncodeInteger64(value)
     else:
-        raise ValueError('Unknown attribute type %s' % datatype)
+        raise ValueError(f'Unknown attribute type {datatype}')
 
 
 def DecodeAttr(datatype, value):
@@ -235,4 +236,4 @@ def DecodeAttr(datatype, value):
     elif datatype == 'integer64':
         return DecodeInteger64(value)
     else:
-        raise ValueError('Unknown attribute type %s' % datatype)
+        raise ValueError(f'Unknown attribute type {datatype}')

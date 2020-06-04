@@ -74,7 +74,7 @@ class DatagramProtocolClient(asyncio.Protocol):
 
     def send_packet(self, packet, future):
         if packet.id in self.pending_requests:
-            raise Exception('Packet with id %d already present' % packet.id)
+            raise Exception(f'Packet with id {packet.id} already present')
 
         # Store packet on pending requests map
         self.pending_requests[packet.id] = {
@@ -154,7 +154,7 @@ class DatagramProtocolClient(asyncio.Protocol):
         return self.packet_id
 
     def __str__(self):
-        return 'DatagramProtocolClient(server?=%s, port=%d)' % (self.server, self.port)
+        return f'DatagramProtocolClient(server?={self.server}, port={self.port})')
 
     # Used as protocol_factory
     def __call__(self):

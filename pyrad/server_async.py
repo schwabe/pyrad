@@ -73,7 +73,7 @@ class DatagramProtocolServer(asyncio.Protocol):
 
         try:
             if req.code in (AccountingResponse, AccessAccept, AccessReject, CoANAK, CoAACK, DisconnectNAK, DisconnectACK):
-                raise ServerPacketError('Invalid response packet %d' % req.code)
+                raise ServerPacketError(f'Invalid response packet {req.code}')
 
             elif self.server_type == ServerType.Auth:
                 if req.code != AccessRequest:
@@ -127,7 +127,7 @@ class DatagramProtocolServer(asyncio.Protocol):
             self.transport = None
 
     def __str__(self):
-        return 'DatagramProtocolServer(ip=%s, port=%d)' % (self.ip, self.port)
+        return f'DatagramProtocolServer(ip={self.ip}, port={self.port})'
 
     # Used as protocol_factory
     def __call__(self):
