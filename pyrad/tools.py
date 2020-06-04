@@ -97,13 +97,13 @@ def EncodeAscendBinary(string):
             terms[key] = b'\x01'
         elif key == 'direction' and value == 'out':
             terms[key] = b'\x00'
-        elif key == 'src' or key == 'dst':
+        elif key in ('src', 'dst'):
             ip = ipaddress.ip_network(value)
             terms[key] = ip.network_address.packed
             terms[key+'l'] = struct.pack('B', ip.prefixlen)
-        elif key == 'sport' or key == 'dport':
+        elif key in ('sport', 'dport'):
             terms[key] = struct.pack('!H', int(value))
-        elif key == 'sportq' or key == 'dportq' or key == 'proto':
+        elif key in ('sportq', 'dportq', 'proto'):
             terms[key] = struct.pack('B', int(value))
 
     trailer = 8 * b'\x00'
