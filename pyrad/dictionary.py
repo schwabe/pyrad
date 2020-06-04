@@ -71,10 +71,11 @@ These datatypes are parsed but not supported:
 |               | where 'h' is hex digits, upper or lowercase. |
 +---------------+----------------------------------------------+
 """
+from copy import copy
+
 from pyrad import bidict
 from pyrad import tools
 from pyrad import dictfile
-from copy import copy
 
 __docformat__ = 'epytext en'
 
@@ -100,10 +101,10 @@ class ParseError(Exception):
 
     def __str__(self):
         line = f'({self.line})' if self.line > -1 else ''
-        return f'{self.file}: ParseError: {self.msg}'
+        return f'{self.file}{line}: ParseError: {self.msg}'
 
 
-class Attribute(object):
+class Attribute():
     def __init__(self, name, code, datatype, is_sub_attribute=False, vendor='', values=None,
                  encrypt=0, has_tag=False):
         if datatype not in DATATYPES:
@@ -123,7 +124,7 @@ class Attribute(object):
                 self.values.add(key, value)
 
 
-class Dictionary(object):
+class Dictionary():
     """RADIUS dictionary class.
     This class stores all information about vendors, attributes and their
     values as defined in RADIUS dictionary files.
@@ -190,9 +191,9 @@ class Dictionary(object):
                 elif key == 'encrypt':
                     if val not in ['1', '2', '3']:
                         raise ParseError(
-                                f'Illegal attribute encryption: {val}',
-                                file=state['file'],
-                                line=state['line'])
+                            f'Illegal attribute encryption: {val}',
+                            file=state['file'],
+                            line=state['line'])
                     encrypt = int(val)
 
             if (not has_tag) and encrypt == 0:
@@ -249,7 +250,8 @@ class Dictionary(object):
                 key = code
 
         self.attrindex.add(attribute, key)
-        self.attributes[attribute] = Attribute(attribute, code, datatype, is_sub_attribute, vendor, encrypt=encrypt, has_tag=has_tag)
+        self.attributes[attribute] = Attribute(attribute, code, datatype, is_sub_attribute,
+                                               vendor, encrypt=encrypt, has_tag=has_tag)
         if datatype == 'tlv':
             # save attribute in tlvs
             state['tlvs'][code] = self.attributes[attribute]
@@ -284,9 +286,9 @@ class Dictionary(object):
     def __parse_vendor(self, state, tokens):
         if len(tokens) not in [3, 4]:
             raise ParseError(
-                    'Incorrect number of tokens for vendor definition',
-                    file=state['file'],
-                    line=state['line'])
+                'Incorrect number of tokens for vendor definition',
+                file=state['file'],
+                line=state['line'])
 
         # Parse format specification, but do
         # nothing about it for now
@@ -294,9 +296,9 @@ class Dictionary(object):
             fmt = tokens[3].split('=')
             if fmt[0] != 'format':
                 raise ParseError(
-                        f"Unknown option '{fmt[0]}' for vendor definition",
-                        file=state['file'],
-                        line=state['line'])
+                    f"Unknown option '{fmt[0]}' for vendor definition",
+                    file=state['file'],
+                    line=state['line'])
             try:
                 (t, l) = tuple(int(a) for a in fmt[1].split(','))
                 if t not in [1, 2, 4] or l not in [0, 1, 2]:
@@ -306,9 +308,9 @@ class Dictionary(object):
                         line=state['line'])
             except ValueError:
                 raise ParseError(
-                        'Syntax error in vendor specification',
-                        file=state['file'],
-                        line=state['line'])
+                    'Syntax error in vendor specification',
+                    file=state['file'],
+                    line=state['line'])
 
         (vendorname, vendor) = tokens[1:3]
         self.vendors.add(vendorname, int(vendor, 0))
@@ -316,17 +318,17 @@ class Dictionary(object):
     def __parse_begin_vendor(self, state, tokens):
         if len(tokens) != 2:
             raise ParseError(
-                    'Incorrect number of tokens for begin-vendor statement',
-                    file=state['file'],
-                    line=state['line'])
+                'Incorrect number of tokens for begin-vendor statement',
+                file=state['file'],
+                line=state['line'])
 
         vendor = tokens[1]
 
         if not self.vendors.has_forward(vendor):
             raise ParseError(
-                    f'Unknown vendor {vendor} in begin-vendor statement',
-                    file=state['file'],
-                    line=state['line'])
+                f'Unknown vendor {vendor} in begin-vendor statement',
+                file=state['file'],
+                line=state['line'])
 
         state['vendor'] = vendor
 
@@ -341,9 +343,9 @@ class Dictionary(object):
 
         if state['vendor'] != vendor:
             raise ParseError(
-                    'Ending non-open vendor' + vendor,
-                    file=state['file'],
-                    line=state['line'])
+                'Ending non-open vendor' + vendor,
+                file=state['file'],
+                line=state['line'])
         state['vendor'] = ''
 
     def ReadDictionary(self, file):
