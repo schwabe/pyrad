@@ -180,59 +180,46 @@ def DecodeDate(num):
     return (struct.unpack('!I', num))[0]
 
 
+ENCODE_MAP = {
+    'string': EncodeString,
+    'octets': EncodeOctets,
+    'integer': EncodeInteger,
+    'ipaddr': EncodeAddress,
+    'ipv6prefix': EncodeIPv6Prefix,
+    'ipv6addr': EncodeIPv6Address,
+    'abinary': EncodeAscendBinary,
+    'signed': lambda value: EncodeInteger(value, '!i'),
+    'short': lambda value: EncodeInteger(value, '!H'),
+    'byte': lambda value: EncodeInteger(value, '!B'),
+    'date': EncodeDate,
+    'integer64': EncodeInteger64,
+}
+
+
 def EncodeAttr(datatype, value):
-    if datatype == 'string':
-        return EncodeString(value)
-    elif datatype == 'octets':
-        return EncodeOctets(value)
-    elif datatype == 'integer':
-        return EncodeInteger(value)
-    elif datatype == 'ipaddr':
-        return EncodeAddress(value)
-    elif datatype == 'ipv6prefix':
-        return EncodeIPv6Prefix(value)
-    elif datatype == 'ipv6addr':
-        return EncodeIPv6Address(value)
-    elif datatype == 'abinary':
-        return EncodeAscendBinary(value)
-    elif datatype == 'signed':
-        return EncodeInteger(value, '!i')
-    elif datatype == 'short':
-        return EncodeInteger(value, '!H')
-    elif datatype == 'byte':
-        return EncodeInteger(value, '!B')
-    elif datatype == 'date':
-        return EncodeDate(value)
-    elif datatype == 'integer64':
-        return EncodeInteger64(value)
-    else:
+    try:
+        return ENCODE_MAP[datatype](value)
+    except KeyError:
         raise ValueError(f'Unknown attribute type {datatype}')
 
 
+DECODE_MAP = {
+    'string': DecodeString,
+    'octets': DecodeOctets,
+    'integer': DecodeInteger,
+    'ipaddr': DecodeAddress,
+    'ipv6prefix': DecodeIPv6Prefix,
+    'ipv6addr': DecodeIPv6Address,
+    'abinary': DecodeAscendBinary,
+    'signed': lambda value: DecodeInteger(value, '!i'),
+    'short': lambda value: DecodeInteger(value, '!H'),
+    'byte': lambda value: DecodeInteger(value, '!B'),
+    'date': DecodeDate,
+    'integer64': DecodeInteger64,
+}
+
 def DecodeAttr(datatype, value):
-    if datatype == 'string':
-        return DecodeString(value)
-    elif datatype == 'octets':
-        return DecodeOctets(value)
-    elif datatype == 'integer':
-        return DecodeInteger(value)
-    elif datatype == 'ipaddr':
-        return DecodeAddress(value)
-    elif datatype == 'ipv6prefix':
-        return DecodeIPv6Prefix(value)
-    elif datatype == 'ipv6addr':
-        return DecodeIPv6Address(value)
-    elif datatype == 'abinary':
-        return DecodeAscendBinary(value)
-    elif datatype == 'signed':
-        return DecodeInteger(value, '!i')
-    elif datatype == 'short':
-        return DecodeInteger(value, '!H')
-    elif datatype == 'byte':
-        return DecodeInteger(value, '!B')
-    elif datatype == 'date':
-        return DecodeDate(value)
-    elif datatype == 'integer64':
-        return DecodeInteger64(value)
-    else:
+    try:
+        return DECODE_MAP[datatype](value)
+    except KeyError:
         raise ValueError(f'Unknown attribute type {datatype}')
