@@ -347,10 +347,7 @@ class Packet(OrderedDict):
         :rtype: binary string
         """
 
-        data = []
-        for _ in range(16):
-            data.append(random_generator.randrange(0, 256))
-        return bytes(data)
+        return secrets.token_bytes(16)
 
     def CreateID(self):
         """Create a packet ID.  All RADIUS requests have a ID which is used to
@@ -361,7 +358,7 @@ class Packet(OrderedDict):
         :rtype:  integer
 
         """
-        return random_generator.randrange(0, 256)
+        return int.from_bytes(secrets.token_bytes(1), 'little')
 
     def ReplyPacket(self):
         """Create a ready-to-transmit authentication reply packet.
