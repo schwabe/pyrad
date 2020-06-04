@@ -62,7 +62,7 @@ class Server(host.Host):
     :cvar MaxPacketSize: maximum size of a RADIUS packet
     :type MaxPacketSize: integer
     """
-    MaxPacketSize = 8192
+    MaxPacketSize = 4096
 
     def __init__(self, addresses=[], authport=1812, acctport=1813, coaport=3799,
                  hosts=None, dict=None, auth_enabled=True, acct_enabled=True, coa_enabled=False):

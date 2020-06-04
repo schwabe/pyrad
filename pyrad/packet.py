@@ -508,7 +508,7 @@ class Packet(OrderedDict):
             raise PacketError('Packet header is corrupt')
         if len(packet) != length:
             raise PacketError('Packet has invalid length')
-        if length > 8192:
+        if length > 4096:
             raise PacketError(f'Packet length is too long ({length})')
 
         self.clear()
