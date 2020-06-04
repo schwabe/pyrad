@@ -319,8 +319,8 @@ class DictionaryParsingTests(unittest.TestCase):
                 'VENDOR Simplon 42\n'))
         for _ in f:
             pass
-        self.assertEqual(f.File(), '')
-        self.assertEqual(f.Line(), -1)
+        self.assertEqual(f.file(), '')
+        self.assertEqual(f.line(), -1)
 
     def testDictFileParseError(self):
         tmpdict = Dictionary()

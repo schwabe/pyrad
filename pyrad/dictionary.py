@@ -364,8 +364,8 @@ class Dictionary():
         state['tlvs'] = {}
         self.defer_parse = []
         for line in fil:
-            state['file'] = fil.File()
-            state['line'] = fil.Line()
+            state['file'] = fil.file()
+            state['line'] = fil.line()
             line = line.split('#', 1)[0].strip()
 
             tokens = line.split()

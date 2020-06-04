@@ -82,7 +82,7 @@ class DictFile(object):
         else:
             return None
 
-    def Line(self):
+    def line(self):
         """Returns line number of current file
         """
         if self.stack:
@@ -90,7 +90,7 @@ class DictFile(object):
         else:
             return -1
 
-    def File(self):
+    def file(self):
         """Returns name of current file
         """
         if self.stack:
