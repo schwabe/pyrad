@@ -214,15 +214,15 @@ class Packet(OrderedDict):
                       **attributes)
 
     def _DecodeValue(self, attr, value):
-        if attr.values.HasBackward(value):
-            return attr.values.GetBackward(value)
+        if attr.values.has_backward(value):
+            return attr.values.get_backward(value)
         else:
             return tools.DecodeAttr(attr.type, value)
 
     def _EncodeValue(self, attr, value):
         result = ''
-        if attr.values.HasForward(value):
-            result = attr.values.GetForward(value)
+        if attr.values.has_forward(value):
+            result = attr.values.get_forward(value)
         else:
             result = tools.EncodeAttr(attr.type, value)
 
@@ -259,15 +259,15 @@ class Packet(OrderedDict):
         attr = self.dict.attributes[key]
         # sub attribute keys don't need vendor
         if attr.vendor and not attr.is_sub_attribute:
-            return (self.dict.vendors.GetForward(attr.vendor), attr.code)
+            return (self.dict.vendors.get_forward(attr.vendor), attr.code)
         else:
             return attr.code
 
     def _DecodeKey(self, key):
         """Turn a key into a string if possible"""
 
-        if self.dict.attrindex.HasBackward(key):
-            return self.dict.attrindex.GetBackward(key)
+        if self.dict.attrindex.has_backward(key):
+            return self.dict.attrindex.get_backward(key)
         return key
 
     def AddAttribute(self, key, value):
@@ -446,7 +446,7 @@ class Packet(OrderedDict):
             for avp in tlv_avps:
                 vendor_avps += struct.pack(
                     '!BBL', 26, (len(avp) + 6),
-                    self.dict.vendors.GetForward(tlv_attr.vendor)
+                    self.dict.vendors.get_forward(tlv_attr.vendor)
                 ) + avp
             return vendor_avps
         else:

@@ -130,7 +130,7 @@ class Attribute(object):
         self.is_sub_attribute = is_sub_attribute
         if values:
             for (key, value) in values.items():
-                self.values.Add(key, value)
+                self.values.add(key, value)
 
 
 class Dictionary(object):
@@ -154,7 +154,7 @@ class Dictionary(object):
         :type dicts:  sequence of strings or files
         """
         self.vendors = bidict.BiDict()
-        self.vendors.Add('', 0)
+        self.vendors.add('', 0)
         self.attrindex = bidict.BiDict()
         self.attributes = {}
         self.defer_parse = []
@@ -207,7 +207,7 @@ class Dictionary(object):
 
             if (not has_tag) and encrypt == 0:
                 vendor = tokens[4]
-                if not self.vendors.HasForward(vendor):
+                if not self.vendors.has_forward(vendor):
                     if vendor == "concat":
                         # ignore attributes with concat (freeradius compat.)
                         return None
@@ -249,16 +249,16 @@ class Dictionary(object):
                              line=state['line'])
         if vendor:
             if is_sub_attribute:
-                key = (self.vendors.GetForward(vendor), parent_code, code)
+                key = (self.vendors.get_forward(vendor), parent_code, code)
             else:
-                key = (self.vendors.GetForward(vendor), code)
+                key = (self.vendors.get_forward(vendor), code)
         else:
             if is_sub_attribute:
                 key = (parent_code, code)
             else:
                 key = code
 
-        self.attrindex.Add(attribute, key)
+        self.attrindex.add(attribute, key)
         self.attributes[attribute] = Attribute(attribute, code, datatype, is_sub_attribute, vendor, encrypt=encrypt, has_tag=has_tag)
         if datatype == 'tlv':
             # save attribute in tlvs
@@ -289,7 +289,7 @@ class Dictionary(object):
         if adef.type in ['integer', 'signed', 'short', 'byte', 'integer64']:
             value = int(value, 0)
         value = tools.EncodeAttr(adef.type, value)
-        self.attributes[attr].values.Add(key, value)
+        self.attributes[attr].values.add(key, value)
 
     def __ParseVendor(self, state, tokens):
         if len(tokens) not in [3, 4]:
@@ -321,7 +321,7 @@ class Dictionary(object):
                         line=state['line'])
 
         (vendorname, vendor) = tokens[1:3]
-        self.vendors.Add(vendorname, int(vendor, 0))
+        self.vendors.add(vendorname, int(vendor, 0))
 
     def __ParseBeginVendor(self, state, tokens):
         if len(tokens) != 2:
@@ -332,7 +332,7 @@ class Dictionary(object):
 
         vendor = tokens[1]
 
-        if not self.vendors.HasForward(vendor):
+        if not self.vendors.has_forward(vendor):
             raise ParseError(
                     'Unknown vendor %s in begin-vendor statement' % vendor,
                     file=state['file'],
