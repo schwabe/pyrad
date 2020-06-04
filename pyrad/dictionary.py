@@ -99,18 +99,8 @@ class ParseError(Exception):
         self.line = data.get('line', -1)
 
     def __str__(self):
-        str = ''
-        if self.file:
-            str += self.file
-        if self.line > -1:
-            str += '(%d)' % self.line
-        if self.file or self.line > -1:
-            str += ': '
-        str += 'Parse error'
-        if self.msg:
-            str += ': %s' % self.msg
-
-        return str
+        line == f'({self.line})' if self.line > -1 else ''
+        return f'{self.file}: ParseError: {self.msg}'
 
 
 class Attribute(object):
@@ -200,7 +190,7 @@ class Dictionary(object):
                 elif key == 'encrypt':
                     if val not in ['1', '2', '3']:
                         raise ParseError(
-                                'Illegal attribute encryption: %s' % val,
+                                f'Illegal attribute encryption: {val}',
                                 file=state['file'],
                                 line=state['line'])
                     encrypt = int(val)
@@ -304,14 +294,14 @@ class Dictionary(object):
             fmt = tokens[3].split('=')
             if fmt[0] != 'format':
                 raise ParseError(
-                        "Unknown option '%s' for vendor definition" % (fmt[0]),
+                        f"Unknown option '{fmt[0]}' for vendor definition",
                         file=state['file'],
                         line=state['line'])
             try:
                 (t, l) = tuple(int(a) for a in fmt[1].split(','))
                 if t not in [1, 2, 4] or l not in [0, 1, 2]:
                     raise ParseError(
-                        'Unknown vendor format specification %s' % (fmt[1]),
+                        f'Unknown vendor format specification {fmt[1]}',
                         file=state['file'],
                         line=state['line'])
             except ValueError:
@@ -334,7 +324,7 @@ class Dictionary(object):
 
         if not self.vendors.has_forward(vendor):
             raise ParseError(
-                    'Unknown vendor %s in begin-vendor statement' % vendor,
+                    f'Unknown vendor {vendor} in begin-vendor statement',
                     file=state['file'],
                     line=state['line'])
 
