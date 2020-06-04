@@ -151,10 +151,10 @@ class Dictionary():
         self.defer_parse = []
 
         if dict:
-            self.ReadDictionary(dict)
+            self.read_dictionary(dict)
 
         for i in dicts:
-            self.ReadDictionary(i)
+            self.read_dictionary(i)
 
     def __len__(self):
         return len(self.attributes)
@@ -348,7 +348,7 @@ class Dictionary():
                 line=state['line'])
         state['vendor'] = ''
 
-    def ReadDictionary(self, file):
+    def read_dictionary(self, file):
         """Parse a dictionary file.
         Reads a RADIUS dictionary file and merges its contents into the
         class instance.
