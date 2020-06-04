@@ -242,7 +242,8 @@ class Packet(OrderedDict):
         key, _, tag = key.partition(":")
         attr = self.dict.attributes[key]
         key = self._EncodeKey(key)
-        if tag:
+        if attr.has_tag:
+            tag = '0' if tag == '' else tag
             tag = struct.pack('B', int(tag))
             if attr.type == "integer":
                 return (key, [tag + self._EncodeValue(attr, v)[1:] for v in values])
