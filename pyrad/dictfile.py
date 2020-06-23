@@ -29,7 +29,7 @@ class _Node(object):
         else:
             self.dir = os.path.join(parentdir, path)
 
-    def Next(self):
+    def next(self):
         if self.current >= self.length:
             return None
         self.current += 1
@@ -85,17 +85,17 @@ class DictFile(object):
     def line(self):
         """Returns line number of current file
         """
-        if self.stack:
+        try:
             return self.stack[-1].current
-        else:
+        except (AttributeError, IndexError):
             return -1
 
     def file(self):
         """Returns name of current file
         """
-        if self.stack:
+        try:
             return self.stack[-1].name
-        else:
+        except (AttributeError, IndexError):
             return ''
 
     def __iter__(self):
@@ -103,7 +103,7 @@ class DictFile(object):
 
     def __next__(self):
         while self.stack:
-            line = self.stack[-1].Next()
+            line = self.stack[-1].next()
             if line is None:
                 self.stack.pop()
             else:
@@ -113,4 +113,5 @@ class DictFile(object):
                 else:
                     return line
         raise StopIteration
+
     next = __next__  # BBB for python <3
