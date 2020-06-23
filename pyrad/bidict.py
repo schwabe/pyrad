@@ -19,10 +19,10 @@ class BiDict():
         return self.get_forward(key)
 
     def __delitem__(self, key):
-        if key in self.forward:
+        try:
             del self.backward[self.forward[key]]
             del self.forward[key]
-        else:
+        except KeyError:
             del self.forward[self.backward[key]]
             del self.backward[key]
 
