@@ -69,11 +69,11 @@ class Client(host.Host):
         :param addr: network address (hostname or IP) and port to bind to
         :type  addr: host,port tuple
         """
-        self._CloseSocket()
-        self._SocketOpen()
+        self._close_socket()
+        self._socket_open()
         self._socket.bind(addr)
 
-    def _SocketOpen(self):
+    def _socket_open(self):
         try:
             family = socket.getaddrinfo(self.server, 'www')[0][0]
         except:
@@ -85,7 +85,7 @@ class Client(host.Host):
                                     socket.SO_REUSEADDR, 1)
             self._poll.register(self._socket, select.POLLIN)
 
-    def _CloseSocket(self):
+    def _close_socket(self):
         if self._socket:
             self._poll.unregister(self._socket)
             self._socket.close()
@@ -127,7 +127,7 @@ class Client(host.Host):
         """
         return host.Host.CreateCoAPacket(self, secret=self.secret, **args)
 
-    def _SendPacket(self, pkt, port):
+    def _send_packet(self, pkt, port):
         """Send a packet to a RADIUS server.
 
         :param pkt:  the packet to send
@@ -138,7 +138,7 @@ class Client(host.Host):
         :rtype:      pyrad.packet.Packet
         :raise Timeout: RADIUS server does not reply
         """
-        self._SocketOpen()
+        self._socket_open()
 
         for attempt in range(self.retries):
             if attempt and pkt.code == packet.AccountingRequest:
@@ -192,7 +192,7 @@ class Client(host.Host):
                                        len(password) + 5,
                                        EAP_TYPE_IDENTITY,
                                        password)]
-            reply = self._SendPacket(pkt, self.authport)
+            reply = self._send_packet(pkt, self.authport)
             if (
                 reply
                 and reply.code == packet.AccessChallenge
@@ -214,9 +214,9 @@ class Client(host.Host):
                 ]
                 # Copy over Challenge-State
                 pkt[24] = reply[24]
-                reply = self._SendPacket(pkt, self.authport)
+                reply = self._send_packet(pkt, self.authport)
             return reply
         elif isinstance(pkt, packet.CoAPacket):
-            return self._SendPacket(pkt, self.coaport)
+            return self._send_packet(pkt, self.coaport)
         else:
-            return self._SendPacket(pkt, self.acctport)
+            return self._send_packet(pkt, self.acctport)
