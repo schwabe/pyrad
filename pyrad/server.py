@@ -103,7 +103,7 @@ class Server(host.Host):
         for addr in addresses:
             self.BindToAddress(addr)
 
-    def _GetAddrInfo(self, addr):
+    def _get_addr_info(self, addr):
         """Use getaddrinfo to lookup all addresses for each address.
 
         Returns a list of tuples or an empty list:
@@ -130,7 +130,7 @@ class Server(host.Host):
         :param addr: IP address to listen on
         :type  addr: string
         """
-        addrFamily = self._GetAddrInfo(addr)
+        addrFamily = self._get_addr_info(addr)
         for (family, address) in addrFamily:
             if self.auth_enabled:
                 authfd = socket.socket(family, socket.SOCK_DGRAM)
@@ -190,7 +190,7 @@ class Server(host.Host):
         :type  pkt: Packet class instance
         """
 
-    def _AddSecret(self, pkt):
+    def _add_secret(self, pkt):
         """Add secret to packets received and raise ServerPacketError
         for unknown hosts.
 
@@ -204,7 +204,7 @@ class Server(host.Host):
         else:
             raise ServerPacketError('Received packet from unknown host')
 
-    def _HandleAuthPacket(self, pkt):
+    def _handle_auth_packet(self, pkt):
         """Process a packet received on the authentication port.
         If this packet should be dropped instead of processed a
         ServerPacketError exception should be raised. The main loop will
@@ -213,13 +213,13 @@ class Server(host.Host):
         :param pkt: packet to process
         :type  pkt: Packet class instance
         """
-        self._AddSecret(pkt)
+        self._add_secret(pkt)
         if pkt.code != packet.AccessRequest:
             raise ServerPacketError(
                 'Received non-authentication packet on authentication port')
         self.HandleAuthPacket(pkt)
 
-    def _HandleAcctPacket(self, pkt):
+    def _handle_acct_packet(self, pkt):
         """Process a packet received on the accounting port.
         If this packet should be dropped instead of processed a
         ServerPacketError exception should be raised. The main loop will
@@ -228,14 +228,14 @@ class Server(host.Host):
         :param pkt: packet to process
         :type  pkt: Packet class instance
         """
-        self._AddSecret(pkt)
+        self._add_secret(pkt)
         if pkt.code not in [packet.AccountingRequest,
                             packet.AccountingResponse]:
             raise ServerPacketError(
                     'Received non-accounting packet on accounting port')
         self.HandleAcctPacket(pkt)
 
-    def _HandleCoaPacket(self, pkt):
+    def _handle_coa_packet(self, pkt):
         """Process a packet received on the coa port.
         If this packet should be dropped instead of processed a
         ServerPacketError exception should be raised. The main loop will
@@ -244,7 +244,7 @@ class Server(host.Host):
         :param pkt: packet to process
         :type  pkt: Packet class instance
         """
-        self._AddSecret(pkt)
+        self._add_secret(pkt)
         pkt.secret = self.hosts[pkt.source[0]].secret
         if pkt.code == packet.CoARequest:
             self.HandleCoaPacket(pkt)
@@ -253,7 +253,7 @@ class Server(host.Host):
         else:
             raise ServerPacketError('Received non-coa packet on coa port')
 
-    def _GrabPacket(self, pktgen, fd):
+    def _grab_packet(self, pktgen, fd):
         """Read a packet from a network connection.
         This method assumes there is data waiting for to be read.
 
@@ -268,7 +268,7 @@ class Server(host.Host):
         pkt.fd = fd
         return pkt
 
-    def _PrepareSockets(self):
+    def _prepare_sockets(self):
         """Prepare all sockets to receive packets.
         """
         for fd in self.authfds + self.acctfds + self.coafds:
@@ -293,7 +293,7 @@ class Server(host.Host):
         reply.source = pkt.source
         return reply
 
-    def _ProcessInput(self, fd):
+    def _process_input(self, fd):
         """Process available data.
         If this packet should be dropped instead of processed a
         PacketError exception should be raised. The main loop will
@@ -307,14 +307,14 @@ class Server(host.Host):
         :type   fd: socket class instance
         """
         if self.auth_enabled and fd.fileno() in self._realauthfds:
-            pkt = self._GrabPacket(lambda data, s=self: s.CreateAuthPacket(packet=data), fd)
-            self._HandleAuthPacket(pkt)
+            pkt = self._grab_packet(lambda data, s=self: s.CreateAuthPacket(packet=data), fd)
+            self._handle_auth_packet(pkt)
         elif self.acct_enabled and fd.fileno() in self._realacctfds:
-            pkt = self._GrabPacket(lambda data, s=self: s.CreateAcctPacket(packet=data), fd)
-            self._HandleAcctPacket(pkt)
+            pkt = self._grab_packet(lambda data, s=self: s.CreateAcctPacket(packet=data), fd)
+            self._handle_acct_packet(pkt)
         elif self.coa_enabled:
-            pkt = self._GrabPacket(lambda data, s=self: s.CreateCoAPacket(packet=data), fd)
-            self._HandleCoaPacket(pkt)
+            pkt = self._grab_packet(lambda data, s=self: s.CreateCoAPacket(packet=data), fd)
+            self._handle_coa_packet(pkt)
         else:
             raise ServerPacketError('Received packet for unknown handler')
 
@@ -326,14 +326,14 @@ class Server(host.Host):
         """
         self._poll = select.poll()
         self._fdmap = {}
-        self._PrepareSockets()
+        self._prepare_sockets()
 
         while True:
             for (fd, event) in self._poll.poll():
                 if event == select.POLLIN:
                     try:
                         fdo = self._fdmap[fd]
-                        self._ProcessInput(fdo)
+                        self._process_input(fdo)
                     except ServerPacketError as err:
                         logger.info('Dropping packet: ' + str(err))
                     except packet.PacketError as err:
