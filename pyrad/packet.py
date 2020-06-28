@@ -106,7 +106,6 @@ class Packet(OrderedDict):
             self.AddAttribute(key, value)
 
     def add_message_authenticator(self):
-
         self.message_authenticator = True
         # Maintain a zero octets content for md5 and hmac calculation.
         self['Message-Authenticator'] = 16 * b'\00'
@@ -257,12 +256,10 @@ class Packet(OrderedDict):
 
     def _decode_key(self, key):
         """Turn a key into a string if possible"""
-
         try:
             return self.dict.attrindex.get_backward(key)
         except KeyError:
-            pass
-        return key
+            return key
 
     def AddAttribute(self, key, value):
         """Add an attribute to the packet.
@@ -618,18 +615,11 @@ class AuthPacket(Packet):
             header = struct.pack(
                 '!BBH16s', self.code, self.id, (20 + 18 + len(attr)), self.authenticator
             )
-            digest = hmac.new(
-                self.secret,
-                header
+            msg = header
                 + attr
                 + struct.pack('!BB16s', 80, struct.calcsize('!BB16s'), b''),
-                digestmod=hashlib.md5
-            ).digest()
-            return (
-                header
-                + attr
-                + struct.pack('!BB16s', 80, struct.calcsize('!BB16s'), digest)
-            )
+            digest = hmac.new(self.secret, msg, digestmod=hashlib.md5).digest()
+            return digest
 
         header = struct.pack('!BBH16s', self.code, self.id,
                              (20 + len(attr)), self.authenticator)
