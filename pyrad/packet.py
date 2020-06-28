@@ -384,14 +384,10 @@ class Packet(OrderedDict):
 
         return header + authenticator + attr
 
-    def VerifyReply(self, reply, rawreply=None):
-        if reply.id != self.id:
-            return False
+    def VerifyReply(self, rawreply):
+        if int(rawreply[1]) != self.id:
+            raise PacketError("Reply Packet has wrong id")
 
-        if rawreply is None:
-            rawreply = reply.ReplyPacket()
-
-        attr = reply._PktEncodeAttributes()
         #  The Authenticator field in an Accounting-Response packet is called
         #  the Response Authenticator, and contains a one-way MD5 hash
         #  calculated over a stream of octets consisting of the Accounting
@@ -401,11 +397,11 @@ class Packet(OrderedDict):
         #  resulting 16 octet MD5 hash value is stored in the Authenticator
         # field of the Accounting-Response packet.
         hash = md5_constructor(rawreply[0:4] + self.authenticator +
-                               attr + self.secret).digest()
+                               rawreply[20:] + self.secret).digest()
 
         if hash != rawreply[4:20]:
-            return False
-        return True
+            raise PacketError("Reply Packet has a wrong authenticator")
+        return self.CreateReply(packet=rawreply)
 
     def _PktEncodeAttribute(self, key, value):
         if isinstance(key, tuple):

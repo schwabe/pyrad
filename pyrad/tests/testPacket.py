@@ -165,19 +165,19 @@ class PacketTests(unittest.TestCase):
 
     def testVerifyReply(self):
         reply = self.packet.CreateReply()
-        self.assertEqual(self.packet.VerifyReply(reply), True)
-
         reply.id += 1
-        self.assertEqual(self.packet.VerifyReply(reply), False)
+        with self.assertRaises(packet.PacketError):
+            self.packet.VerifyReply(reply.ReplyPacket())
         reply.id = self.packet.id
 
         reply.secret = b'different'
-        self.assertEqual(self.packet.VerifyReply(reply), False)
+        with self.assertRaises(packet.PacketError):
+            self.packet.VerifyReply(reply.ReplyPacket())
         reply.secret = self.packet.secret
 
         reply.authenticator = b'X' * 16
-        self.assertEqual(self.packet.VerifyReply(reply), False)
-        reply.authenticator = self.packet.authenticator
+        with self.assertRaises(packet.PacketError):
+            self.packet.VerifyReply(reply.ReplyPacket())
 
     def testPktEncodeAttribute(self):
         encode = self.packet._PktEncodeAttribute
