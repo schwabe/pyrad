@@ -34,11 +34,8 @@ class DatagramProtocolClient(asyncio.Protocol):
         self.timeout_future = None
 
     async def __timeout_handler__(self):
-
         try:
-
             while True:
-
                 req2delete = []
                 now = datetime.now()
                 next_weak_up = self.timeout
@@ -48,7 +45,8 @@ class DatagramProtocolClient(asyncio.Protocol):
                     secs = (req['send_date'] - now).seconds
                     if secs > self.timeout:
                         if req['retries'] == self.retries:
-                            self.logger.debug('[%s:%d] For request %d execute all retries', self.server, self.port, id)
+                            self.logger.debug('[%s:%d] For request %d execute all retries',
+                                              self.server, self.port, id)
                             req['future'].set_exception(
                                 TimeoutError('Timeout on Reply')
                             )
@@ -57,7 +55,8 @@ class DatagramProtocolClient(asyncio.Protocol):
                             # Send again packet
                             req['send_date'] = now
                             req['retries'] += 1
-                            self.logger.debug('[%s:%d] For request %d execute retry %d', self.server, self.port, id, req['retries'])
+                            self.logger.debug('[%s:%d] For request %d execute retry %d',
+                                              self.server, self.port, id, req['retries'])
                             self.transport.sendto(req['packet'].RequestPacket())
                     elif next_weak_up > secs:
                         next_weak_up = secs
@@ -68,7 +67,6 @@ class DatagramProtocolClient(asyncio.Protocol):
                     del self.pending_requests[id]
 
                 await asyncio.sleep(next_weak_up)
-
         except asyncio.CancelledError:
             pass
 

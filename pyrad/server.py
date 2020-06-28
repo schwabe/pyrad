@@ -2,14 +2,14 @@
 #
 # Copyright 2003-2004,2007,2016 Wichert Akkerman <wichert@wiggy.net>
 
+import logging
 import select
 import socket
 from pyrad import host
 from pyrad import packet
-import logging
 
 
-logger = logging.getLogger('pyrad')
+LOGGER = logging.getLogger('pyrad')
 
 
 class RemoteHost:
@@ -232,7 +232,7 @@ class Server(host.Host):
         if pkt.code not in [packet.AccountingRequest,
                             packet.AccountingResponse]:
             raise ServerPacketError(
-                    'Received non-accounting packet on accounting port')
+                'Received non-accounting packet on accounting port')
         self.HandleAcctPacket(pkt)
 
     def _handle_coa_packet(self, pkt):
@@ -335,8 +335,8 @@ class Server(host.Host):
                         fdo = self._fdmap[fd]
                         self._process_input(fdo)
                     except ServerPacketError as err:
-                        logger.info('Dropping packet: ' + str(err))
+                        LOGGER.info('Dropping packet: %s', err)
                     except packet.PacketError as err:
-                        logger.info('Received a broken packet: ' + str(err))
+                        LOGGER.info('Received a broken packet: %s', err)
                 else:
-                    logger.error('Unexpected event in server main loop')
+                    LOGGER.error('Unexpected event in server main loop')

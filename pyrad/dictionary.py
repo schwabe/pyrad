@@ -95,6 +95,7 @@ class ParseError(Exception):
     """
 
     def __init__(self, msg=None, **data):
+        super().__init__()
         self.msg = msg
         self.file = data.get('file', '')
         self.line = data.get('line', -1)
@@ -185,6 +186,7 @@ class Dictionary():
                 else:
                     return (kv[0], None)
             options = [keyval(o) for o in tokens[4].split(',')]
+
             for (key, val) in options:
                 if key == 'has_tag':
                     has_tag = True

@@ -193,13 +193,12 @@ class Client(host.Host):
                                        EAP_TYPE_IDENTITY,
                                        password)]
             reply = self._send_packet(pkt, self.authport)
-            if (
-                reply
-                and reply.code == packet.AccessChallenge
-                and pkt.auth_type == 'eap-md5'
-            ):
+            if (reply
+                    and reply.code == packet.AccessChallenge
+                    and pkt.auth_type == 'eap-md5'
+               ):
                 # Got an Access-Challenge
-                eap_code, eap_id, eap_size, eap_type, eap_md5 = struct.unpack(
+                _eap_code, eap_id, _eap_size, _eap_type, eap_md5 = struct.unpack(
                     '!BBHB%ds' % (len(reply[79][0]) - 5), reply[79][0]
                 )
                 # Sending back an EAP-Type-MD5-Challenge
@@ -216,7 +215,8 @@ class Client(host.Host):
                 pkt[24] = reply[24]
                 reply = self._send_packet(pkt, self.authport)
             return reply
-        elif isinstance(pkt, packet.CoAPacket):
+
+        if isinstance(pkt, packet.CoAPacket):
             return self._send_packet(pkt, self.coaport)
-        else:
-            return self._send_packet(pkt, self.acctport)
+
+        return self._send_packet(pkt, self.acctport)

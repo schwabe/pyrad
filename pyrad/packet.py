@@ -71,7 +71,7 @@ class Packet(OrderedDict):
         :param packet: raw packet to decode
         :type packet:  string
         """
-        OrderedDict.__init__(self)
+        super().__init__()
         self.code = code
         if id is not None:
             self.id = id
@@ -98,9 +98,9 @@ class Packet(OrderedDict):
 
         for (key, value) in attributes.items():
             if key in [
-                'dict', 'fd', 'packet',
-                'message_authenticator',
-            ]:
+                    'dict', 'fd', 'packet',
+                    'message_authenticator',
+                ]:
                 continue
             key = key.replace('_', '-')
             self.AddAttribute(key, value)
@@ -236,6 +236,8 @@ class Packet(OrderedDict):
             tag = '0' if tag == '' else tag
             tag = struct.pack('B', int(tag))
             if attr.type == "integer":
+                # When a tagged value has the type int only 3 bytes are used
+                # the first byte is the tag itself, so we need to shorten our int
                 return (key, [tag + self._encode_value(attr, v)[1:] for v in values])
             else:
                 return (key, [tag + self._encode_value(attr, v) for v in values])
@@ -292,9 +294,9 @@ class Packet(OrderedDict):
 
     def __getitem__(self, key):
         if not isinstance(key, str):
-            return OrderedDict.__getitem__(self, key)
+            return super().__getitem__(key)
 
-        values = OrderedDict.__getitem__(self, self._encode_key(key))
+        values = super().__getitem__(self._encode_key(key))
         attr = self.dict.attributes[key]
         if attr.type == 'tlv':  # return map from sub attribute code to its values
             res = {}
@@ -312,19 +314,19 @@ class Packet(OrderedDict):
 
     def __contains__(self, key):
         try:
-            return OrderedDict.__contains__(self, self._encode_key(key))
+            return super().__contains__(self._encode_key(key))
         except KeyError:
             return False
 
     has_key = __contains__
 
     def __delitem__(self, key):
-        OrderedDict.__delitem__(self, self._encode_key(key))
+        super().__delitem__(self._encode_key(key))
 
     def __setitem__(self, key, item):
         if isinstance(key, str):
             (key, item) = self._encode_key_values(key, item)
-        OrderedDict.__setitem__(self, key, item)
+        super().__setitem__(key, item)
 
     def keys(self):
         return [self._decode_key(key) for key in OrderedDict.keys(self)]
@@ -362,8 +364,8 @@ class Packet(OrderedDict):
         :return: raw packet
         :rtype:  string
         """
-        assert(self.authenticator)
-        assert(self.secret is not None)
+        assert self.authenticator
+        assert self.secret is not None
 
         if self.message_authenticator:
             self._refresh_message_authenticator()
@@ -721,7 +723,7 @@ class AuthPacket(Packet):
         :return: True if verification failed else False
         :rtype: boolean
         """
-        assert(self.raw_packet)
+        assert self.raw_packet
         hash = md5_constructor(self.raw_packet[0:4] + 16 * b'\x00' +
                                self.raw_packet[20:] + self.secret).digest()
         return hash == self.authenticator
@@ -764,7 +766,7 @@ class AcctPacket(Packet):
         :return: False if verification failed else True
         :rtype: boolean
         """
-        assert(self.raw_packet)
+        assert self.raw_packet
 
         hash = md5_constructor(self.raw_packet[0:4] + 16 * b'\x00' +
                                self.raw_packet[20:] + self.secret).digest()
@@ -833,7 +835,7 @@ class CoAPacket(Packet):
         :return: False if verification failed else True
         :rtype: boolean
         """
-        assert(self.raw_packet)
+        assert self.raw_packet
         hash = md5_constructor(self.raw_packet[0:4] + 16 * b'\x00' +
                                self.raw_packet[20:] + self.secret).digest()
         return hash == self.authenticator

@@ -11,7 +11,7 @@ RADIUS $INCLUDE directives behind the scene.
 import os
 
 
-class _Node(object):
+class _Node():
     """Dictionary file node
 
     A single dictionary file.
@@ -36,13 +36,13 @@ class _Node(object):
         return self.lines[self.current - 1]
 
 
-class DictFile(object):
+class DictFile():
     """Dictionary file class
 
     An iterable file type that handles $INCLUDE
     directives internally.
     """
-    __slots__ = ('stack')
+    __slots__ = ['stack']
 
     def __init__(self, fil):
         """
@@ -71,16 +71,15 @@ class DictFile(object):
     def __cur_dir(self):
         if self.stack:
             return self.stack[-1].dir
-        else:
-            return os.path.realpath(os.curdir)
+        return os.path.realpath(os.curdir)
 
-    def __get_include(self, line):
+    @staticmethod
+    def __get_include(line):
         line = line.split("#", 1)[0].strip()
         tokens = line.split()
         if tokens and tokens[0].upper() == '$INCLUDE':
             return " ".join(tokens[1:])
-        else:
-            return None
+        return None
 
     def line(self):
         """Returns line number of current file
@@ -107,7 +106,7 @@ class DictFile(object):
             if line is None:
                 self.stack.pop()
             else:
-                inc = self.__get_include(line)
+                inc = DictFile.__get_include(line)
                 if inc:
                     self.__read_node(inc)
                 else:
