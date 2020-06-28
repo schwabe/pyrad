@@ -180,7 +180,7 @@ class PacketTests(unittest.TestCase):
             self.packet.VerifyReply(reply.ReplyPacket())
 
     def testPktEncodeAttribute(self):
-        encode = self.packet._PktEncodeAttribute
+        encode = self.packet._pkt_encode_attribute
 
         # Encode a normal attribute
         self.assertEqual(
@@ -192,7 +192,7 @@ class PacketTests(unittest.TestCase):
                 b'\x1a\x0d\x00\x00\x00\x01\x02\x07value')
 
     def testPktEncodeTlvAttribute(self):
-        encode = self.packet._PktEncodeTlv
+        encode = self.packet._pkt_encode_tlv
 
         # Encode a normal tlv attribute
         self.assertEqual(
@@ -209,7 +209,7 @@ class PacketTests(unittest.TestCase):
                 b'\x1a\x15\x00\x00\x00\x10\x03\x0f\x01\x07value\x02\x06\x00\x00\x00\x02')
 
     def testPktEncodeLongTlvAttribute(self):
-        encode = self.packet._PktEncodeTlv
+        encode = self.packet._pkt_encode_tlv
 
         long_str = b'a' * 245
         # Encode a long tlv attribute - check it is split between AVPs
@@ -224,29 +224,29 @@ class PacketTests(unittest.TestCase):
                 encode((16, 3), {1: [b'value', long_str], 2: [b'\x00\x00\x00\x02']}),
                 first_avp + second_avp)
 
-    def testPktEncodeAttributes(self):
+    def testpkt_encode_attributes(self):
         self.packet[1] = [b'value']
-        self.assertEqual(self.packet._PktEncodeAttributes(),
+        self.assertEqual(self.packet._pkt_encode_attributes(),
                          b'\x01\x07value')
 
         self.packet.clear()
         self.packet[(16, 2)] = [b'value']
-        self.assertEqual(self.packet._PktEncodeAttributes(),
+        self.assertEqual(self.packet._pkt_encode_attributes(),
                          b'\x1a\x0d\x00\x00\x00\x10\x02\x07value')
 
         self.packet.clear()
         self.packet[1] = [b'one', b'two', b'three']
-        self.assertEqual(self.packet._PktEncodeAttributes(),
+        self.assertEqual(self.packet._pkt_encode_attributes(),
                          b'\x01\x05one\x01\x05two\x01\x07three')
 
         self.packet.clear()
         self.packet[1] = [b'value']
         self.packet[(16, 2)] = [b'value']
-        self.assertEqual(self.packet._PktEncodeAttributes(),
+        self.assertEqual(self.packet._pkt_encode_attributes(),
                          b'\x01\x07value\x1a\x0d\x00\x00\x00\x10\x02\x07value')
 
     def testPktDecodeVendorAttribute(self):
-        decode = self.packet._PktDecodeVendorAttribute
+        decode = self.packet._pkt_decode_vendor_attribute
 
         # Non-RFC2865 recommended form
         self.assertEqual(decode(b''), [(26, b'')])
@@ -261,7 +261,7 @@ class PacketTests(unittest.TestCase):
                          [((16, 2), b'value')])
 
     def testPktDecodeTlvAttribute(self):
-        decode = self.packet._PktDecodeTlvAttribute
+        decode = self.packet._pkt_decode_tlv_attribute
 
         decode(4, b'\x01\x07value')
         self.assertEqual(self.packet[4], {1: [b'value']})
@@ -372,10 +372,10 @@ class PacketTests(unittest.TestCase):
         self.assertEqual(self.packet[26], [b'value'])
 
     def testEncodeKeyValues(self):
-        self.assertEqual(self.packet._EncodeKeyValues(1, '1234'), (1, '1234'))
+        self.assertEqual(self.packet._encode_key_values(1, '1234'), (1, '1234'))
 
     def testEncodeKey(self):
-        self.assertEqual(self.packet._EncodeKey(1), 1)
+        self.assertEqual(self.packet._encode_key(1), 1)
 
     def testAddAttribute(self):
         self.packet.AddAttribute('Test-String', '1')

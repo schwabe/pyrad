@@ -127,7 +127,7 @@ class Packet(OrderedDict):
 
         # Maintain a zero octets content for md5 and hmac calculation.
         self['Message-Authenticator'] = 16 * b'\00'
-        attr = self._PktEncodeAttributes()
+        attr = self._pkt_encode_attributes()
 
         header = struct.pack('!BBH', self.code, self.id,
                              (20 + len(attr)))
@@ -164,7 +164,7 @@ class Packet(OrderedDict):
         prev_ma = self['Message-Authenticator']
 
         self['Message-Authenticator'] = 16 * b'\00'
-        attr = self._PktEncodeAttributes()
+        attr = self._pkt_encode_attributes()
 
         header = struct.pack('!BBH', self.code, self.id,
                              (20 + len(attr)))
@@ -204,13 +204,13 @@ class Packet(OrderedDict):
                       authenticator=self.authenticator, dict=self.dict,
                       **attributes)
 
-    def _DecodeValue(self, attr, value):
+    def _decode_value(self, attr, value):
         try:
             return attr.values.get_backward(value)
         except KeyError:
             return tools.DecodeAttr(attr.type, value)
 
-    def _EncodeValue(self, attr, value):
+    def _encode_value(self, attr, value):
         try:
             result = attr.values.get_forward(value)
         except KeyError:
@@ -222,7 +222,7 @@ class Packet(OrderedDict):
 
         return result
 
-    def _EncodeKeyValues(self, key, values):
+    def _encode_key_values(self, key, values):
         if not isinstance(key, str):
             return (key, values)
 
@@ -231,18 +231,18 @@ class Packet(OrderedDict):
 
         key, _, tag = key.partition(":")
         attr = self.dict.attributes[key]
-        key = self._EncodeKey(key)
+        key = self._encode_key(key)
         if attr.has_tag:
             tag = '0' if tag == '' else tag
             tag = struct.pack('B', int(tag))
             if attr.type == "integer":
-                return (key, [tag + self._EncodeValue(attr, v)[1:] for v in values])
+                return (key, [tag + self._encode_value(attr, v)[1:] for v in values])
             else:
-                return (key, [tag + self._EncodeValue(attr, v) for v in values])
+                return (key, [tag + self._encode_value(attr, v) for v in values])
         else:
-            return (key, [self._EncodeValue(attr, v) for v in values])
+            return (key, [self._encode_value(attr, v) for v in values])
 
-    def _EncodeKey(self, key):
+    def _encode_key(self, key):
         if not isinstance(key, str):
             return key
 
@@ -253,7 +253,7 @@ class Packet(OrderedDict):
         else:
             return attr.code
 
-    def _DecodeKey(self, key):
+    def _decode_key(self, key):
         """Turn a key into a string if possible"""
 
         try:
@@ -273,10 +273,10 @@ class Packet(OrderedDict):
         """
         attr = self.dict.attributes[key.partition(':')[0]]
 
-        (key, value) = self._EncodeKeyValues(key, value)
+        (key, value) = self._encode_key_values(key, value)
 
         if attr.is_sub_attribute:
-            tlv = self.setdefault(self._EncodeKey(attr.parent.name), {})
+            tlv = self.setdefault(self._encode_key(attr.parent.name), {})
             encoded = tlv.setdefault(key, [])
         else:
             encoded = self.setdefault(key, [])
@@ -294,7 +294,7 @@ class Packet(OrderedDict):
         if not isinstance(key, str):
             return OrderedDict.__getitem__(self, key)
 
-        values = OrderedDict.__getitem__(self, self._EncodeKey(key))
+        values = OrderedDict.__getitem__(self, self._encode_key(key))
         attr = self.dict.attributes[key]
         if attr.type == 'tlv':  # return map from sub attribute code to its values
             res = {}
@@ -302,32 +302,32 @@ class Packet(OrderedDict):
                 sub_attr_name = attr.sub_attributes[sub_attr_key]
                 sub_attr = self.dict.attributes[sub_attr_name]
                 for v in sub_attr_val:
-                    res.setdefault(sub_attr_name, []).append(self._DecodeValue(sub_attr, v))
+                    res.setdefault(sub_attr_name, []).append(self._decode_value(sub_attr, v))
             return res
         else:
             res = []
             for v in values:
-                res.append(self._DecodeValue(attr, v))
+                res.append(self._decode_value(attr, v))
             return res
 
     def __contains__(self, key):
         try:
-            return OrderedDict.__contains__(self, self._EncodeKey(key))
+            return OrderedDict.__contains__(self, self._encode_key(key))
         except KeyError:
             return False
 
     has_key = __contains__
 
     def __delitem__(self, key):
-        OrderedDict.__delitem__(self, self._EncodeKey(key))
+        OrderedDict.__delitem__(self, self._encode_key(key))
 
     def __setitem__(self, key, item):
         if isinstance(key, str):
-            (key, item) = self._EncodeKeyValues(key, item)
+            (key, item) = self._encode_key_values(key, item)
         OrderedDict.__setitem__(self, key, item)
 
     def keys(self):
-        return [self._DecodeKey(key) for key in OrderedDict.keys(self)]
+        return [self._decode_key(key) for key in OrderedDict.keys(self)]
 
     @staticmethod
     def CreateAuthenticator():
@@ -368,7 +368,7 @@ class Packet(OrderedDict):
         if self.message_authenticator:
             self._refresh_message_authenticator()
 
-        attr = self._PktEncodeAttributes()
+        attr = self._pkt_encode_attributes()
         header = struct.pack('!BBH', self.code, self.id, (20 + len(attr)))
 
         authenticator = md5_constructor(header[0:4] + self.authenticator
@@ -395,16 +395,16 @@ class Packet(OrderedDict):
             raise PacketError("Reply Packet has a wrong authenticator")
         return self.CreateReply(packet=rawreply)
 
-    def _PktEncodeAttribute(self, key, value):
+    def _pkt_encode_attribute(self, key, value):
         if isinstance(key, tuple):
             value = struct.pack('!L', key[0]) + \
-                self._PktEncodeAttribute(key[1], value)
+                self._pkt_encode_attribute(key[1], value)
             key = 26
 
         return struct.pack('!BB', key, (len(value) + 2)) + value
 
-    def _PktEncodeTlv(self, tlv_key, tlv_value):
-        tlv_attr = self.dict.attributes[self._DecodeKey(tlv_key)]
+    def _pkt_encode_tlv(self, tlv_key, tlv_value):
+        tlv_attr = self.dict.attributes[self._decode_key(tlv_key)]
         curr_avp = b''
         avps = []
         max_sub_attribute_len = max(map(lambda item: len(item[1]), tlv_value.items()))
@@ -412,7 +412,7 @@ class Packet(OrderedDict):
             sub_attr_encoding = b''
             for (code, datalst) in tlv_value.items():
                 if i < len(datalst):
-                    sub_attr_encoding += self._PktEncodeAttribute(code, datalst[i])
+                    sub_attr_encoding += self._pkt_encode_attribute(code, datalst[i])
             # split above 255. assuming len of one instance of all sub tlvs is lower than 255
             if (len(sub_attr_encoding) + len(curr_avp)) < 245:
                 curr_avp += sub_attr_encoding
@@ -435,29 +435,29 @@ class Packet(OrderedDict):
         else:
             return b''.join(tlv_avps)
 
-    def _PktEncodeAttributes(self):
+    def _pkt_encode_attributes(self):
         result = b''
         for (code, datalst) in self.items():
-            attribute = self.dict.attributes.get(self._DecodeKey(code))
+            attribute = self.dict.attributes.get(self._decode_key(code))
             if attribute and attribute.type == 'tlv':
-                result += self._PktEncodeTlv(code, datalst)
+                result += self._pkt_encode_tlv(code, datalst)
             else:
                 for data in datalst:
-                    result += self._PktEncodeAttribute(code, data)
+                    result += self._pkt_encode_attribute(code, data)
         return result
 
-    def _PktDecodeVendorAttribute(self, data):
+    def _pkt_decode_vendor_attribute(self, data):
         # Check if this packet is long enough to be in the
         # RFC2865 recommended form
         if len(data) < 6:
             return [(26, data)]
 
         (vendor, atype, length) = struct.unpack('!LBB', data[:6])[0:3]
-        attribute = self.dict.attributes.get(self._DecodeKey((vendor, atype)))
+        attribute = self.dict.attributes.get(self._decode_key((vendor, atype)))
         try:
             if attribute and attribute.type == 'tlv':
-                self._PktDecodeTlvAttribute((vendor, atype), data[6:length + 4])
-                tlvs = []  # tlv is added to the packet inside _PktDecodeTlvAttribute
+                self._pkt_decode_tlv_attribute((vendor, atype), data[6:length + 4])
+                tlvs = []  # tlv is added to the packet inside _pkt_decode_tlv_attribute
             else:
                 tlvs = [((vendor, atype), data[6:length + 4])]
         except:
@@ -473,7 +473,7 @@ class Packet(OrderedDict):
             sumlength += length
         return tlvs
 
-    def _PktDecodeTlvAttribute(self, code, data):
+    def _pkt_decode_tlv_attribute(self, code, data):
         sub_attributes = self.setdefault(code, {})
         loc = 0
 
@@ -513,16 +513,16 @@ class Packet(OrderedDict):
                 raise PacketError(f'Attribute length is too small (attrlen)')
 
             value = packet[2:attrlen]
-            attribute = self.dict.attributes.get(self._DecodeKey(key))
+            attribute = self.dict.attributes.get(self._decode_key(key))
             if key == 26:
-                for (key, value) in self._PktDecodeVendorAttribute(value):
+                for (key, value) in self._pkt_decode_vendor_attribute(value):
                     self.setdefault(key, []).append(value)
             elif key == 80:
                 # POST: Message Authenticator AVP is present.
                 self.message_authenticator = True
                 self.setdefault(key, []).append(value)
             elif attribute and attribute.type == 'tlv':
-                self._PktDecodeTlvAttribute(key, value)
+                self._pkt_decode_tlv_attribute(key, value)
             else:
                 self.setdefault(key, []).append(value)
 
@@ -611,7 +611,7 @@ class AuthPacket(Packet):
         if self.message_authenticator:
             self._refresh_message_authenticator()
 
-        attr = self._PktEncodeAttributes()
+        attr = self._pkt_encode_attributes()
         if self.auth_type == 'eap-md5':
             header = struct.pack(
                 '!BBH16s', self.code, self.id, (20 + 18 + len(attr)), self.authenticator
@@ -786,7 +786,7 @@ class AcctPacket(Packet):
         if self.message_authenticator:
             self._refresh_message_authenticator()
 
-        attr = self._PktEncodeAttributes()
+        attr = self._pkt_encode_attributes()
         header = struct.pack('!BBH', self.code, self.id, (20 + len(attr)))
         self.authenticator = md5_constructor(header[0:4] + 16 * b'\x00' +
                                              attr + self.secret).digest()
@@ -847,7 +847,7 @@ class CoAPacket(Packet):
         :rtype:  string
         """
 
-        attr = self._PktEncodeAttributes()
+        attr = self._pkt_encode_attributes()
 
         if self.id is None:
             self.id = self.CreateID()
@@ -858,7 +858,7 @@ class CoAPacket(Packet):
 
         if self.message_authenticator:
             self._refresh_message_authenticator()
-            attr = self._PktEncodeAttributes()
+            attr = self._pkt_encode_attributes()
             self.authenticator = md5_constructor(header[0:4] + 16 * b'\x00' +
                                                  attr + self.secret).digest()
 
