@@ -90,6 +90,7 @@ class Packet(OrderedDict):
             self.dict = attributes['dict']
 
         if 'packet' in attributes:
+            self.raw_packet = attributes['packet']
             self.DecodePacket(attributes['packet'])
 
         if 'message_authenticator' in attributes:
@@ -595,8 +596,6 @@ class AuthPacket(Packet):
 
         Packet.__init__(self, code, id, secret, authenticator, **attributes)
         self.auth_type = auth_type
-        if 'packet' in attributes:
-            self.raw_packet = attributes['packet']
 
     def CreateReply(self, **attributes):
         """Create a new packet as a reply to this one. This method
@@ -761,8 +760,6 @@ class AcctPacket(Packet):
         :type packet:  string
         """
         Packet.__init__(self, code, id, secret, authenticator, **attributes)
-        if 'packet' in attributes:
-            self.raw_packet = attributes['packet']
 
     def CreateReply(self, **attributes):
         """Create a new packet as a reply to this one. This method
@@ -832,8 +829,6 @@ class CoAPacket(Packet):
         :type packet:  string
         """
         Packet.__init__(self, code, id, secret, authenticator, **attributes)
-        if 'packet' in attributes:
-            self.raw_packet = attributes['packet']
 
     def CreateReply(self, **attributes):
         """Create a new packet as a reply to this one. This method
