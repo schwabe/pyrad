@@ -150,7 +150,7 @@ class Packet(OrderedDict):
         hmac_constructor.update(attr)
         self['Message-Authenticator'] = hmac_constructor.digest()
 
-    def verify_message_authenticator(self, secret=None,
+    def verify_message_authenticator(self,
                                      original_authenticator=None,
                                      original_code=None):
         """Verify packet Message-Authenticator.
@@ -162,14 +162,6 @@ class Packet(OrderedDict):
             raise Exception('No Message-Authenticator AVP present')
 
         prev_ma = self['Message-Authenticator']
-        # Set zero bytes for Message-Authenticator for md5 calculation
-        if secret is None and self.secret is None:
-            raise Exception('Missing secret for HMAC/MD5 verification')
-
-        if secret:
-            key = secret
-        else:
-            key = self.secret
 
         self['Message-Authenticator'] = 16 * b'\00'
         attr = self._PktEncodeAttributes()
@@ -177,7 +169,7 @@ class Packet(OrderedDict):
         header = struct.pack('!BBH', self.code, self.id,
                              (20 + len(attr)))
 
-        hmac_constructor = hmac.new(key, digestmod=hashlib.md5)
+        hmac_constructor = hmac.new(self.secret, digestmod=hashlib.md5)
         hmac_constructor.update(header)
         if self.code in (AccountingRequest, DisconnectRequest,
                          CoARequest, AccountingResponse):
