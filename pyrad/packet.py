@@ -615,8 +615,8 @@ class AuthPacket(Packet):
             header = struct.pack(
                 '!BBH16s', self.code, self.id, (20 + 18 + len(attr)), self.authenticator
             )
-            msg = header
-                + attr
+            msg = header \
+                + attr \
                 + struct.pack('!BB16s', 80, struct.calcsize('!BB16s'), b''),
             digest = hmac.new(self.secret, msg, digestmod=hashlib.md5).digest()
             return digest
