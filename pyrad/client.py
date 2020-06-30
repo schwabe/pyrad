@@ -163,8 +163,9 @@ class Client(host.Host):
                     continue
 
                 try:
-                    reply = pkt.VerifyReply(rawreply)
+                    return pkt.VerifyReply(rawreply)
                 except packet.PacketError:
+                    # TODO: report or error out maybe?
                     pass
 
                 now = time.time()
