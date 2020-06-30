@@ -116,26 +116,17 @@ class DatagramProtocolClient(asyncio.Protocol):
     # noinspection PyUnusedLocal
     def datagram_received(self, data, addr):
         try:
-            reply = Packet(packet=data, dict=self.client.dict)
-
-            if reply and reply.id in self.pending_requests:
-                req = self.pending_requests[reply.id]
-                packet = req['packet']
-
-                reply.dict = packet.dict
-                reply.secret = packet.secret
-
-                if packet.VerifyReply(reply, data):
-                    req['future'].set_result(reply)
-                    # Remove request for map
-                    del self.pending_requests[reply.id]
-                else:
-                    self.logger.warn('[%s:%d] Ignore invalid reply for id %d. %s', self.server, self.port, reply.id)
-            else:
-                self.logger.warn('[%s:%d] Ignore invalid reply: %s', self.server, self.port, data)
-
-        except Exception as exc:
-            self.logger.error('[%s:%d] Error on decode packet: %s', self.server, self.port, exc)
+            req = self.pending_requests[data[0]]
+            reply = req.VerifyPacket(data)
+            req['future'].set_result(reply)
+            # Remove request for map
+            del self.pending_requests[reply.id]
+        except KeyError:
+            self.logger.warn('[%s:%d] Ignore invalid reply: %s',
+                             self.server, self.port, data)
+        except PacketError as exc:
+            self.logger.error('[%s:%d] Error on decode or verify packet: %s',
+                              self.server, self.port, exc)
 
     async def close_transport(self):
         if self.transport:

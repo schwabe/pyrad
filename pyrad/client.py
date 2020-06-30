@@ -163,9 +163,7 @@ class Client(host.Host):
                     continue
 
                 try:
-                    reply = pkt.CreateReply(packet=rawreply)
-                    if pkt.VerifyReply(reply, rawreply):
-                        return reply
+                    reply = pkt.VerifyReply(rawreply)
                 except packet.PacketError:
                     pass
 
